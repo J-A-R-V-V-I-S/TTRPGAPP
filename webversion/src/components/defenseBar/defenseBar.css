@@ -1,0 +1,225 @@
+.defense-bar-container {
+  background: linear-gradient(135deg, #f7fafc 0%, #ffffff 100%);
+  border-radius: 16px;
+  border: 2px solid #e2e8f0;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.defense-bar-container:hover {
+  border-color: #f6ad55;
+  box-shadow: 0 6px 12px rgba(246, 173, 85, 0.15);
+}
+
+.defense-bar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.defense-label-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.defense-icon {
+  color: #f6ad55;
+  flex-shrink: 0;
+}
+
+.defense-label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.defense-total {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(246, 173, 85, 0.4);
+  position: relative;
+}
+
+.defense-total::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+}
+
+.defense-total-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+.defense-breakdown {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  background: #ffffff;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.defense-component {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 70px;
+}
+
+.defense-component.base {
+  background: #f7fafc;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e0;
+}
+
+.defense-component.dex {
+  background: #ebf8ff;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #90cdf4;
+}
+
+.defense-component.armor {
+  background: #faf5ff;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #d6bcfa;
+}
+
+.defense-component.shield {
+  background: #f0fff4;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #9ae6b4;
+}
+
+.defense-component.other {
+  background: #fffaf0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #fbd38d;
+}
+
+.component-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.component-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+.component-value.editable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+}
+
+.component-value.editable:hover {
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+}
+
+.defense-separator {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #a0aec0;
+  margin: 0 0.25rem;
+}
+
+.component-input {
+  width: 60px;
+  padding: 0.25rem 0.5rem;
+  border: 2px solid #667eea;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: center;
+  color: #2d3748;
+  background: #ffffff;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.component-input:focus {
+  border-color: #f6ad55;
+  box-shadow: 0 0 0 3px rgba(246, 173, 85, 0.2);
+}
+
+/* Remover arrows do input number */
+.component-input::-webkit-outer-spin-button,
+.component-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.component-input[type=number] {
+  -moz-appearance: textfield;
+}
+
+@media (max-width: 768px) {
+  .defense-bar-container {
+    padding: 1rem;
+  }
+
+  .defense-breakdown {
+    gap: 0.5rem;
+    padding: 0.75rem;
+    justify-content: center;
+  }
+
+  .defense-component {
+    min-width: 60px;
+  }
+
+  .defense-total {
+    width: 50px;
+    height: 50px;
+  }
+
+  .defense-total-value {
+    font-size: 1.5rem;
+  }
+
+  .component-label {
+    font-size: 0.65rem;
+  }
+
+  .component-value {
+    font-size: 1.1rem;
+  }
+
+  .defense-separator {
+    font-size: 1rem;
+    margin: 0;
+  }
+}
+

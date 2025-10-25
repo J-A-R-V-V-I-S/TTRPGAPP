@@ -1,0 +1,27 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f0f0f0;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Classe para páginas com navbar - compensar navbar fixa na parte inferior em telas pequenas */
+.with-navbar {
+  padding-bottom: 80px; /* Altura aproximada da navbar */
+}
+
+@media (min-width: 801px) {
+  .with-navbar {
+    padding-bottom: 0;
+  }
+}

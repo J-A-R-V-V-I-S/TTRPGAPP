@@ -1,0 +1,37 @@
+.profile-container {
+  min-height: calc(100vh - 70px);
+  background: #f7fafc;
+}
+
+.profile-container h1 {
+  font-size: 3rem;
+  color: #667eea;
+  text-align: center;
+}
+
+.profile-content-row {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 0;
+}
+
+/* Desktop layout - Above 800px */
+@media (min-width: 800px) {
+  .profile-content-row {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 0 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+  
+  /* Make Description and Proficiencies take 50% each */
+  .profile-content-row > * {
+    flex: 1;
+    min-width: 0;
+  }
+}
+

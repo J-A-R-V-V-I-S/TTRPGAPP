@@ -1,0 +1,363 @@
+.profile-header {
+  position: relative;
+  width: 100%;
+  height: 340px;
+  overflow: hidden;
+  background: #f5f5f5;
+  border-radius: 0 0 24px 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.profile-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 180px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-size: cover;
+  background-position: center;
+}
+
+.profile-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.3) 100%);
+}
+
+.profile-options-container {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+}
+
+.profile-options-button {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.profile-options-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.profile-options-button:active {
+  transform: scale(0.95);
+}
+
+.profile-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  min-width: 200px;
+  backdrop-filter: blur(10px);
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.profile-dropdown-item {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.profile-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.profile-dropdown-item svg {
+  flex-shrink: 0;
+}
+
+.profile-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 100px;
+  z-index: 2;
+}
+
+.profile-avatar-container {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.profile-avatar {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 6px solid #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.profile-avatar:hover {
+  transform: scale(1.05);
+}
+
+.profile-avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
+  font-size: 48px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.profile-info {
+  text-align: center;
+  padding: 0 20px;
+}
+
+.profile-username {
+  font-size: 24px;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.profile-stats {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  max-width: 600px;
+}
+
+.profile-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 18px;
+  color: #ffffff;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.profile-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.profile-level {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.profile-class {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.profile-race {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.profile-deity {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.profile-origin {
+  background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+}
+
+.profile-size {
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  color: #2d3748;
+}
+
+.profile-movement {
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  color: #2d3748;
+}
+
+/* Responsive Design - Acima de 800px */
+@media (min-width: 800px) {
+  .profile-header {
+    height: 320px;
+  }
+
+  .profile-background {
+    height: 100%;
+  }
+
+  .profile-content {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 0;
+    padding-left: 60px;
+    padding-right: 60px;
+    height: 100%;
+    gap: 32px;
+  }
+
+  .profile-avatar-container {
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+
+  .profile-avatar {
+    width: 160px;
+    height: 160px;
+  }
+
+  .profile-avatar-placeholder {
+    font-size: 56px;
+  }
+
+  .profile-info {
+    text-align: left;
+    padding: 0;
+    flex-grow: 1;
+    max-width: 600px;
+  }
+
+  .profile-username {
+    font-size: 32px;
+    color: #ffffff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .profile-stats {
+    justify-content: flex-start;
+  }
+}
+
+/* Responsive Design - Tablets */
+@media (max-width: 768px) {
+  .profile-header {
+    height: 340px;
+  }
+
+  .profile-background {
+    height: 160px;
+  }
+
+  .profile-content {
+    padding-top: 80px;
+  }
+
+  .profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-width: 5px;
+  }
+
+  .profile-avatar-placeholder {
+    font-size: 42px;
+  }
+
+  .profile-username {
+    font-size: 20px;
+  }
+
+  .profile-badge {
+    font-size: 13px;
+    padding: 6px 14px;
+  }
+
+  .profile-stats {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-header {
+    height: 340px;
+    border-radius: 0 0 16px 16px;
+  }
+
+  .profile-background {
+    height: 140px;
+  }
+
+  .profile-content {
+    padding-top: 70px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-width: 4px;
+  }
+
+  .profile-avatar-placeholder {
+    font-size: 36px;
+  }
+
+  .profile-username {
+    font-size: 18px;
+  }
+
+  .profile-badge {
+    font-size: 11px;
+    padding: 5px 12px;
+  }
+
+  .profile-stats {
+    gap: 6px;
+  }
+}
+

@@ -1,0 +1,244 @@
+.mana-bar-container {
+  background: linear-gradient(135deg, #f8f9ff 0%, #e8eaff 100%);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 2px solid #d6d8f0;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  transition: all 0.3s ease;
+}
+
+.mana-bar-container:hover {
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.25);
+  border-color: #b8bcf0;
+}
+
+.mana-bar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.mana-label-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.mana-icon {
+  color: #667eea;
+  animation: manaGlow 2s ease-in-out infinite;
+}
+
+@keyframes manaGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 2px rgba(102, 126, 234, 0.5));
+    transform: rotate(0deg);
+  }
+  50% {
+    filter: drop-shadow(0 0 8px rgba(102, 126, 234, 0.8));
+    transform: rotate(180deg);
+  }
+}
+
+.mana-label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.mana-values {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.mana-current {
+  color: #667eea;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  min-width: 60px;
+  text-align: center;
+}
+
+.mana-current:hover {
+  background: #e6ecff;
+  color: #5568d3;
+}
+
+.mana-separator {
+  color: #a0aec0;
+}
+
+.mana-max {
+  color: #718096;
+}
+
+.mana-input {
+  width: 80px;
+  padding: 0.25rem 0.5rem;
+  border: 2px solid #667eea;
+  border-radius: 8px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  color: #667eea;
+  background: #ffffff;
+}
+
+.mana-input:focus {
+  outline: none;
+  border-color: #764ba2;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.mana-bar-wrapper {
+  margin-bottom: 1rem;
+}
+
+.mana-bar-background {
+  width: 100%;
+  height: 32px;
+  background: #d6d8f0;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mana-bar-fill {
+  height: 100%;
+  border-radius: 16px;
+  transition: width 0.5s ease, background-color 0.5s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.mana-bar-shine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.5),
+    transparent
+  );
+  animation: manaShine 2.5s ease-in-out infinite;
+}
+
+@keyframes manaShine {
+  0% {
+    left: -100%;
+  }
+  50% {
+    left: 100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+.mana-bar-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    transparent 50%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
+}
+
+.mana-bar-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.mana-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+}
+
+.mana-restore {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.mana-restore:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+}
+
+.mana-restore:active {
+  transform: translateY(0);
+}
+
+.mana-spend {
+  background: linear-gradient(135deg, #805ad5 0%, #6b46c1 100%);
+  color: white;
+}
+
+.mana-spend:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(128, 90, 213, 0.5);
+}
+
+.mana-spend:active {
+  transform: translateY(0);
+}
+
+.mana-full {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  color: white;
+  flex: 1.5;
+}
+
+.mana-full:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(66, 153, 225, 0.5);
+}
+
+.mana-full:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .mana-bar-container {
+    padding: 1rem;
+  }
+
+  .mana-values {
+    font-size: 1.25rem;
+  }
+
+  .mana-bar-actions {
+    flex-wrap: wrap;
+  }
+
+  .mana-action-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+}
+
