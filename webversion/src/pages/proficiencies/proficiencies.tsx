@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useCharacter } from '../../contexts/CharacterContext';
+import { useAttributes } from '../../contexts/AttributesContext';
 import Navbar from '../../components/navbar/navbar';
 import './proficiencies.css';
 
 const Proficiencies = () => {
-  const { character, updateSkill, refreshSkills } = useCharacter();
+  const { character } = useCharacter();
+  const { attributes, skills, updateSkill, refreshSkills } = useAttributes();
   const [editingSkill, setEditingSkill] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<{
     isTrained: boolean;
@@ -53,17 +55,17 @@ const Proficiencies = () => {
   };
 
   const getAttributeValue = (attributeName: string): number => {
-    if (!character?.attributes) return 10;
-    
+    if (!attributes) return 10;
+
     const attrMap: { [key: string]: number } = {
-      'Força': character.attributes.forca + (character.attributes.forcaTempMod || 0),
-      'Destreza': character.attributes.destreza + (character.attributes.destrezaTempMod || 0),
-      'Constituição': character.attributes.constituicao + (character.attributes.constituicaoTempMod || 0),
-      'Inteligência': character.attributes.inteligencia + (character.attributes.inteligenciaTempMod || 0),
-      'Sabedoria': character.attributes.sabedoria + (character.attributes.sabedoriaTempMod || 0),
-      'Carisma': character.attributes.carisma + (character.attributes.carismaTempMod || 0),
+      'Força': attributes.forca + (attributes.forcaTempMod || 0),
+      'Destreza': attributes.destreza + (attributes.destrezaTempMod || 0),
+      'Constituição': attributes.constituicao + (attributes.constituicaoTempMod || 0),
+      'Inteligência': attributes.inteligencia + (attributes.inteligenciaTempMod || 0),
+      'Sabedoria': attributes.sabedoria + (attributes.sabedoriaTempMod || 0),
+      'Carisma': attributes.carisma + (attributes.carismaTempMod || 0),
     };
-    
+
     return attrMap[attributeName] || 10;
   };
 
@@ -105,8 +107,8 @@ const Proficiencies = () => {
           <p className="page-subtitle">Gerencie as perícias do seu personagem</p>
           
           <div className="skills-grid">
-            {character.skills && character.skills.length > 0 ? (
-              character.skills.map((skill) => {
+            {skills && skills.length > 0 ? (
+              skills.map((skill) => {
                 const skillTotal = calculateSkillTotal(skill);
                 const isEditing = editingSkill === skill.id;
                 const cannotUse = skill.onlyTrained && !skill.isTrained;

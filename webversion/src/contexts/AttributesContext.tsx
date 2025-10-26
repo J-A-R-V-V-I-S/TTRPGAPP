@@ -96,7 +96,7 @@ export const AttributesProvider = ({ children }: AttributesProviderProps) => {
     const loadedSkills = await loadItems<CharacterSkill>(
       'skills',
       characterId,
-      mapSkillFromDb,
+      (data: any) => mapSkillFromDb(data) as CharacterSkill,
       [{ column: 'name', ascending: true }]
     );
 
@@ -175,7 +175,7 @@ export const AttributesProvider = ({ children }: AttributesProviderProps) => {
       async () => {
         const dbUpdates = mapSkillToDb(updates);
 
-        await updateItem('skills', skillId, dbUpdates, selectedCharacterId, 'Perícia atualizada com sucesso!');
+        await updateItem('skills', skillId, dbUpdates, selectedCharacterId ?? undefined, 'Perícia atualizada com sucesso!');
 
         // Update local state
         setSkills(prev =>

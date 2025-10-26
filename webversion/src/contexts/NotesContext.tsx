@@ -103,7 +103,7 @@ export const NotesProvider = ({ children }: NotesProviderProps) => {
     await executeWithLogging(
       async () => {
         const noteData = mapNoteToDbUpdate(data);
-        await updateDbItem('notes', noteId, noteData, selectedCharacterId, 'Anotação atualizada com sucesso!');
+        await updateDbItem('notes', noteId, noteData, selectedCharacterId ?? undefined, 'Anotação atualizada com sucesso!');
         await refreshNotes();
       },
       'atualizar anotação'
@@ -116,7 +116,7 @@ export const NotesProvider = ({ children }: NotesProviderProps) => {
 
     await executeWithLogging(
       async () => {
-        await deleteItem('notes', noteId, selectedCharacterId, 'Anotação deletada com sucesso!');
+        await deleteItem('notes', noteId, selectedCharacterId ?? undefined, 'Anotação deletada com sucesso!');
 
         // Update local state immediately
         setNotes(prev => prev.filter(note => note.id !== noteId));

@@ -3,6 +3,8 @@ import { useEffect } from 'react';
 import { supabase } from '../../config/supabase';
 import { useUser } from '../../contexts/UserContext';
 import { useCharacter } from '../../contexts/CharacterContext';
+import { useInventory } from '../../contexts/InventoryContext';
+import { useTransactions } from '../../contexts/TransactionContext';
 import Navbar from '../../components/navbar/navbar';
 import ProfileHeader from '../../components/profileHeader/profileHeader';
 import Description from '../../components/description/description';
@@ -23,11 +25,10 @@ const Profile = () => {
     updateDescription,
     updateProficienciesAndHabilities,
     updateMaxInventorySlots,
-    addItemToInventory,
-    updateItemQuantity,
-    addTransaction,
-    deleteTransaction,
   } = useCharacter();
+
+  const { inventory, currentLoad, addItemToInventory, updateItemQuantity } = useInventory();
+  const { transactions, addTransaction, deleteTransaction } = useTransactions();
 
   // Set the selected character when the component mounts
   useEffect(() => {
@@ -94,22 +95,22 @@ const Profile = () => {
 
   const handleConsumeItem = async (itemId: string) => {
     console.log('Consumir item:', itemId);
-    
+
     try {
       // Encontrar o item no inventário
-      const item = character?.inventory?.find(inv => inv.id === itemId);
-      
+      const item = inventory.find(inv => inv.id === itemId);
+
       if (!item) {
         console.error('Item não encontrado no inventário');
         return;
       }
-      
+
       // Diminuir a quantidade em 1
       const newQuantity = item.quantity - 1;
-      
+
       // Atualizar a quantidade (se for 0, será removido automaticamente)
       await updateItemQuantity(itemId, newQuantity);
-      
+
       console.log(`Item ${item.name} consumido. Nova quantidade: ${newQuantity}`);
     } catch (err) {
       console.error('Erro ao consumir item:', err);
@@ -244,16 +245,16 @@ const Profile = () => {
         </div>
         
         <Currency
-          transactions={character.transactions}
+          transactions={transactions}
           onAddTransaction={addTransaction}
           onDeleteTransaction={deleteTransaction}
           characterId={character.id}
         />
-        
-        <Backpack 
+
+        <Backpack
           maxCapacity={character.max_inventory_slots}
-          currentLoad={character.current_load}
-          items={(character.inventory || []).map(item => ({
+          currentLoad={currentLoad}
+          items={(inventory || []).map(item => ({
             id: item.id,
             name: item.name,
             description: item.description,

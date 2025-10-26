@@ -30,7 +30,7 @@ export const logWarning = (message: string): void => {
  * Validate character ID exists
  * Throws error with context if validation fails
  */
-export const validateCharacterId = (characterId: string | undefined, context: string): void => {
+export const validateCharacterId = (characterId: string | undefined | null, context: string): void => {
   if (!characterId) {
     const errorMessage = `Nenhum personagem carregado (${context})`;
     console.error(errorMessage);

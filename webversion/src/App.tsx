@@ -2,6 +2,11 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { UserProvider } from './contexts/UserContext';
 import { CharacterProvider } from './contexts/CharacterContext';
+import { InventoryProvider } from './contexts/InventoryContext';
+import { CombatProvider } from './contexts/CombatContext';
+import { TransactionProvider } from './contexts/TransactionContext';
+import { NotesProvider } from './contexts/NotesContext';
+import { AttributesProvider } from './contexts/AttributesContext';
 import Home from './pages/home/home';
 import Login from './pages/auth/login/login';
 import Register from './pages/auth/register/register';
@@ -22,23 +27,33 @@ function App() {
     <AuthProvider>
       <UserProvider>
         <CharacterProvider>
-          <Router>
-            <Routes>
-              <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/profile/:characterId" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-              <Route path="/notes" element={<ProtectedRoute><Notes /></ProtectedRoute>} />
-              <Route path="/backstory" element={<ProtectedRoute><BackstoryPage /></ProtectedRoute>} />
-              <Route path="/combat" element={<ProtectedRoute><Combat /></ProtectedRoute>} />
-              <Route path="/skills" element={<ProtectedRoute><Skills /></ProtectedRoute>} />
-              <Route path="/proficiencies" element={<ProtectedRoute><Proficiencies /></ProtectedRoute>} />
-              <Route path="/group" element={<ProtectedRoute><Group /></ProtectedRoute>} />
-              <Route path="/attributes" element={<ProtectedRoute><Attributes /></ProtectedRoute>} />
-              <Route path="/create-character" element={<ProtectedRoute><CharacterCreation /></ProtectedRoute>} />
-              <Route path="/modal-example" element={<ModalExample />} />
-            </Routes>
-          </Router>
+          <InventoryProvider>
+            <CombatProvider>
+              <TransactionProvider>
+                <NotesProvider>
+                  <AttributesProvider>
+                    <Router>
+                      <Routes>
+                        <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/register" element={<Register />} />
+                        <Route path="/profile/:characterId" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                        <Route path="/notes" element={<ProtectedRoute><Notes /></ProtectedRoute>} />
+                        <Route path="/backstory" element={<ProtectedRoute><BackstoryPage /></ProtectedRoute>} />
+                        <Route path="/combat" element={<ProtectedRoute><Combat /></ProtectedRoute>} />
+                        <Route path="/skills" element={<ProtectedRoute><Skills /></ProtectedRoute>} />
+                        <Route path="/proficiencies" element={<ProtectedRoute><Proficiencies /></ProtectedRoute>} />
+                        <Route path="/group" element={<ProtectedRoute><Group /></ProtectedRoute>} />
+                        <Route path="/attributes" element={<ProtectedRoute><Attributes /></ProtectedRoute>} />
+                        <Route path="/create-character" element={<ProtectedRoute><CharacterCreation /></ProtectedRoute>} />
+                        <Route path="/modal-example" element={<ModalExample />} />
+                      </Routes>
+                    </Router>
+                  </AttributesProvider>
+                </NotesProvider>
+              </TransactionProvider>
+            </CombatProvider>
+          </InventoryProvider>
         </CharacterProvider>
       </UserProvider>
     </AuthProvider>

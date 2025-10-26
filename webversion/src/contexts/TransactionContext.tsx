@@ -93,7 +93,7 @@ export const TransactionProvider = ({ children }: TransactionProviderProps) => {
 
     await executeWithLogging(
       async () => {
-        await deleteItem('transactions', transactionId, selectedCharacterId, 'Transação deletada com sucesso!');
+        await deleteItem('transactions', transactionId, selectedCharacterId ?? undefined, 'Transação deletada com sucesso!');
         await refreshTransactions();
       },
       'deletar transação'

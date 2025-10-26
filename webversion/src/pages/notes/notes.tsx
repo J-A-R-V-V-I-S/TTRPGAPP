@@ -3,22 +3,22 @@ import Navbar from '../../components/navbar/navbar';
 import Modal from '../../components/modal/modal';
 import NoteForm from '../../components/modal/forms/NoteForm';
 import type { NoteFormData } from '../../components/modal/forms/NoteForm';
-import { useCharacter } from '../../contexts/CharacterContext';
+import { useNotes } from '../../contexts/NotesContext';
 import type { Note } from '../../types/note';
 import './notes.css';
 
 const Notes = () => {
-  const { character, addNote, updateNote, deleteNote } = useCharacter();
+  const { notes, addNote, updateNote, deleteNote } = useNotes();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [collapsedNotes, setCollapsedNotes] = useState<Set<string>>(new Set());
 
   // Inicializar todas as anotações como colapsadas
   useEffect(() => {
-    if (character?.notes) {
-      setCollapsedNotes(new Set(character.notes.map(note => note.id)));
+    if (notes) {
+      setCollapsedNotes(new Set(notes.map(note => note.id)));
     }
-  }, [character?.notes?.length]); // Só atualiza quando o número de notas muda
+  }, [notes.length]); // Só atualiza quando o número de notas muda
 
   const handleOpenModal = () => {
     setEditingNote(null);
@@ -106,8 +106,8 @@ const Notes = () => {
   };
 
   // Separate pinned and unpinned notes
-  const pinnedNotes = character?.notes?.filter(note => note.isPinned) || [];
-  const unpinnedNotes = character?.notes?.filter(note => !note.isPinned) || [];
+  const pinnedNotes = notes.filter(note => note.isPinned);
+  const unpinnedNotes = notes.filter(note => !note.isPinned);
 
   return (
     <div className="with-navbar">
@@ -315,7 +315,7 @@ const Notes = () => {
             )}
 
             {/* Estado vazio */}
-            {!character?.notes || character.notes.length === 0 && (
+            {notes.length === 0 && (
               <div className="notes-empty-state">
                 <p className="notes-empty-icon">📝</p>
                 <p className="notes-empty-title">Nenhuma anotação ainda</p>
