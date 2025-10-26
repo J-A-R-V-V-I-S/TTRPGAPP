@@ -14,6 +14,13 @@ import type { SpellFormData } from '../../components/modal/forms/SpellForm';
 import type { AbilityFormData } from '../../components/modal/forms/AbilityForm';
 import { useCharacter } from '../../contexts/CharacterContext';
 import { useCombat } from '../../contexts/CombatContext';
+import AttacksList from '../../components/AttacksList/AttacksList';
+import SpellsList from '../../components/SpellsList/SpellsList';
+import SpellDetails from '../../components/SpellDetails/SpellDetails';
+import AprimoramentoForm from '../../components/AprimoramentoForm/AprimoramentoForm';
+import SkillsSection from '../../components/SkillsSection/SkillsSection';
+import { generateSkillsTabData } from '../../utils/combatHelpers';
+import type { Skill, AbilityTabType as SkillTabType } from '../../utils/combatHelpers';
 import './combat.css';
 
 type TabType = 'attacks' | 'spells';
@@ -369,61 +376,16 @@ const Combat = () => {
 
 
   // Tab data for abilities and powers section
-  const skillsTabData: TabData<AbilityTabType, any> = useMemo(() => ({
-    tabs: [
-      { key: 'abilities', label: 'Habilidades', icon: '⚡' },
-      { key: 'powers', label: 'Poderes', icon: '✨' }
-    ],
-    items: {
-      abilities,
-      powers
-    },
-    getItemFields: (skill) => {
-      const fields = [];
-      
-      if (skill.category || skill.type) {
-        fields.push({ label: 'Categoria', value: skill.category || skill.type });
-      }
-      
-      if (skill.cost) {
-        fields.push({ label: 'Custo/Uso', value: skill.cost });
-      }
-      
-      if (skill.prerequisites) {
-        fields.push({ label: 'Pré-requisitos', value: skill.prerequisites });
-      }
-      
-      if (skill.cooldown) {
-        fields.push({ label: 'Recarga', value: skill.cooldown });
-      }
-      
-      if (skill.effect) {
-        fields.push({ label: 'Efeito', value: skill.effect });
-      }
-      
-      return fields;
-    },
-    getActionButtons: (skill, tabKey) => [
-      {
-        label: '✏️ Editar',
-        onClick: () => handleEditSkill(skill, tabKey),
-        show: true
-      },
-      {
-        label: '🗑️ Deletar',
-        onClick: () => handleDeleteSkill(skill.id, tabKey),
-        className: 'delete',
-        show: true
-      }
-    ],
-    getNoSelectionMessage: (tabKey) => 
-      tabKey === 'abilities' 
-        ? 'Selecione uma habilidade para ver os detalhes'
-        : 'Selecione um poder para ver os detalhes',
-    onAddItem: handleAddSkill,
-    onUpdateDescription: handleUpdateSkillDescription,
-    showMenu: false // Remove the "..." menu for abilities and powers
-  }), [abilities, powers, handleEditSkill, handleDeleteSkill, handleAddSkill, handleUpdateSkillDescription]);
+  const skillsTabData: TabData<AbilityTabType, Skill> = useMemo(
+    () =>
+      generateSkillsTabData(abilities, powers, {
+        handleEditSkill,
+        handleDeleteSkill,
+        handleAddSkill,
+        handleUpdateSkillDescription,
+      }),
+    [abilities, powers]
+  );
 
   return (
     <div className="with-navbar">
@@ -510,144 +472,41 @@ const Combat = () => {
           <div className="combat-layout">
             {/* ATTACKS TAB */}
             {activeTab === 'attacks' && (
-              <>
-                <div className="combat-list">
-                  <div className="list-header">
-                    <h2>Ataques Disponíveis</h2>
-                  </div>
-                  {attacks.map(attack => (
-                    <div 
-                      key={attack.id} 
-                      className={`combat-item ${selectedAttack?.id === attack.id ? 'selected' : ''}`}
-                      onClick={() => setSelectedAttack(attack)}
-                    >
-                      <div className="combat-item-header">
-                        <div className="combat-name-level">
-                          <span className="combat-name">{attack.name}</span>
-                          <span className="combat-level">{attack.type}</span>
-                        </div>
-                        <div className="combat-item-actions">
-                          <span className="attack-bonus">{attack.testeAtaque}</span>
-                          <div className="item-menu-container">
-                            <button 
-                              className="item-menu-btn"
-                              onClick={(e) => toggleMenu(`attack-${attack.id}`, e)}
-                            >
-                              ⋮
-                            </button>
-                            {openMenuId === `attack-${attack.id}` && (
-                              <div className="item-menu-dropdown">
-                                <button 
-                                  className="menu-option"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleEditAttack(attack);
-                                  }}
-                                >
-                                  ✏️ Editar
-                                </button>
-                                <button 
-                                  className="menu-option delete"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDeleteAttack(attack.id);
-                                  }}
-                                >
-                                  🗑️ Deletar
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="combat-school">{attack.damage}</div>
-                    </div>
-                  ))}
-                  <div 
-                    className="combat-item add-item-btn"
-                    onClick={() => handleAddCombatItem('attacks')}
-                  >
-                    <div className="add-item-content">
-                      <span className="add-item-icon">+</span>
-                      <span className="add-item-text">Adicionar Ataque</span>
-                    </div>
-                  </div>
+              <div className="combat-list">
+                <div className="list-header">
+                  <h2>Ataques Disponíveis</h2>
                 </div>
-              </>
+                <AttacksList
+                  attacks={attacks}
+                  selectedAttack={selectedAttack}
+                  onSelectAttack={setSelectedAttack}
+                  onEditAttack={handleEditAttack}
+                  onDeleteAttack={handleDeleteAttack}
+                  onAddAttack={() => handleAddCombatItem('attacks')}
+                  openMenuId={openMenuId}
+                  onToggleMenu={toggleMenu}
+                />
+              </div>
             )}
 
             {/* SPELLS TAB */}
             {activeTab === 'spells' && (
-              <>
-                <div className="combat-list">
-                  <div className="list-header">
-                    <h2>Grimório</h2>
-                  </div>
-                  {spells.map(spell => (
-                    <div 
-                      key={spell.id} 
-                      className={`combat-item ${selectedSpell?.id === spell.id ? 'selected' : ''}`}
-                      onClick={() => setSelectedSpell(spell)}
-                    >
-                      <div className="combat-item-header">
-                        <div className="combat-name-level">
-                          <span className="combat-name">{spell.name}</span>
-                          <span className="combat-level">{spell.escola}</span>
-                        </div>
-                        <div className="combat-item-actions">
-                          <input 
-                            type="checkbox" 
-                            checked={false}
-                            onChange={() => toggleSpellPrepared(spell.id)}
-                            onClick={(e) => e.stopPropagation()}
-                            title="Preparada"
-                          />
-                          <div className="item-menu-container">
-                            <button 
-                              className="item-menu-btn"
-                              onClick={(e) => toggleMenu(`spell-${spell.id}`, e)}
-                            >
-                              ⋮
-                            </button>
-                            {openMenuId === `spell-${spell.id}` && (
-                              <div className="item-menu-dropdown">
-                                <button 
-                                  className="menu-option"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleEditSpell(spell);
-                                  }}
-                                >
-                                  ✏️ Editar
-                                </button>
-                                <button 
-                                  className="menu-option delete"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDeleteSpell(spell.id);
-                                  }}
-                                >
-                                  🗑️ Deletar
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="combat-school">{spell.execucao}</div>
-                    </div>
-                  ))}
-                  <div 
-                    className="combat-item add-item-btn"
-                    onClick={() => handleAddCombatItem('spells')}
-                  >
-                    <div className="add-item-content">
-                      <span className="add-item-icon">+</span>
-                      <span className="add-item-text">Adicionar Magia</span>
-                    </div>
-                  </div>
+              <div className="combat-list">
+                <div className="list-header">
+                  <h2>Grimório</h2>
                 </div>
-              </>
+                <SpellsList
+                  spells={spells}
+                  selectedSpell={selectedSpell}
+                  onSelectSpell={setSelectedSpell}
+                  onEditSpell={handleEditSpell}
+                  onDeleteSpell={handleDeleteSpell}
+                  onAddSpell={() => handleAddCombatItem('spells')}
+                  onToggleSpellPrepared={toggleSpellPrepared}
+                  openMenuId={openMenuId}
+                  onToggleMenu={toggleMenu}
+                />
+              </div>
             )}
 
 
