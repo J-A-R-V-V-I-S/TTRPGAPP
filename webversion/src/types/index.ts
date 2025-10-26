@@ -55,13 +55,15 @@ export type {
 // ============================================================================
 // Items & Equipment
 // ============================================================================
-export type { 
-  Item, 
-  Weapon, 
-  Equipment, 
-  Ammo, 
-  Consumable 
+export type {
+  Item,
+  Weapon,
+  Equipment,
+  Ammo,
+  Consumable
 } from './items';
+
+export type { InventoryItem } from './inventory';
 
 export type { Currency } from './currency';
 
