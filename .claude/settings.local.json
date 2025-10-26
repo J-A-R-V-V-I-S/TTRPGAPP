@@ -12,7 +12,10 @@
       "Bash(tree:*)",
       "mcp__supabase__execute_sql",
       "mcp__archon__find_projects",
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
