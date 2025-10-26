@@ -16,16 +16,25 @@ const SIZES = [
   { id: 'Colossal', name: 'Colossal', description: '20+ pés' },
 ];
 
-// Raças disponíveis
+// Raças disponíveis (Tormenta RPG)
 const RACES = [
-  { id: 'human', name: 'Humano', description: 'Versátil e adaptável' },
-  { id: 'elf', name: 'Elfo', description: 'Ágil e sábio' },
-  { id: 'dwarf', name: 'Anão', description: 'Resistente e forte' },
-  { id: 'halfling', name: 'Halfling', description: 'Pequeno e sortudo' },
-  { id: 'orc', name: 'Orc', description: 'Feroz e poderoso' },
-  { id: 'tiefling', name: 'Tiefling', description: 'Misterioso e carismático' },
-  { id: 'dragonborn', name: 'Draconato', description: 'Nobre e honorável' },
-  { id: 'gnome', name: 'Gnomo', description: 'Curioso e inteligente' },
+  { id: 'humano', name: 'Humano', description: 'Versátil e adaptável' },
+  { id: 'anao', name: 'Anão', description: 'Resistente e forte, mestres artesãos' },
+  { id: 'dahllan', name: 'Dahllan', description: 'Meio-demônios com herança infernal' },
+  { id: 'elfo', name: 'Elfo', description: 'Ágeis e conectados à magia' },
+  { id: 'goblin', name: 'Goblin', description: 'Pequenos, astutos e inventivos' },
+  { id: 'lefou', name: 'Lefou', description: 'Meio-feras com instintos animais' },
+  { id: 'minotauro', name: 'Minotauro', description: 'Poderosos guerreiros taurinos' },
+  { id: 'qareen', name: 'Qareen', description: 'Gênios do deserto com magia elemental' },
+  { id: 'golem', name: 'Golem', description: 'Construtos vivos de origem mágica' },
+  { id: 'hynne', name: 'Hynne', description: 'Meio-gnolls ferozes e leais' },
+  { id: 'kliren', name: 'Kliren', description: 'Insectoides metódicos e trabalhadores' },
+  { id: 'medusa', name: 'Medusa', description: 'Serpentinas com olhar petrificante' },
+  { id: 'osteon', name: 'Osteon', description: 'Mortos-vivos conscientes e honrados' },
+  { id: 'sereia', name: 'Sereia/Tritão', description: 'Habitantes dos mares e oceanos' },
+  { id: 'silfide', name: 'Sílfide', description: 'Seres alados leves e graciosos' },
+  { id: 'suraggel', name: 'Suraggel', description: 'Anjos caídos em busca de redenção' },
+  { id: 'trog', name: 'Trog', description: 'Humanoides reptilianos primitivos' },
 ];
 
 // Classes disponíveis (Tormenta RPG)
