@@ -5,8 +5,19 @@ import GroupCurrency from '../../components/currency/GroupCurrency';
 import Modal from '../../components/modal/modal';
 import GroupForm from '../../components/modal/forms/GroupForm';
 import type { GroupFormData } from '../../components/modal/forms/GroupForm';
+import GroupMemberCard from '../../components/GroupMemberCard/GroupMemberCard';
 import { useCharacter } from '../../contexts/CharacterContext';
 import { supabase } from '../../config/supabase';
+import {
+  transformGroupItem,
+  GROUP_WITH_MEMBERS_QUERY,
+  GROUP_CONFIG,
+} from '../../utils/groupHelpers';
+import {
+  createGroupService,
+  joinGroupService,
+  loadGroupStorageItems,
+} from '../../services/groupService';
 import './group.css';
 
 
@@ -130,13 +141,7 @@ const Group = () => {
           
           const { data: groupsData, error: groupsError } = await supabase
             .from('groups')
-            .select(`
-              *,
-              group_members (
-                id,
-                character_id
-              )
-            `);
+            .select(GROUP_WITH_MEMBERS_QUERY);
 
           if (groupsError) {
             throw groupsError;
@@ -145,7 +150,7 @@ const Group = () => {
           // Transformar dados dos grupos para o formato da interface
           const availableGroupsData: AvailableGroup[] = (groupsData || []).map(group => {
             const memberCount = group.group_members?.length || 0;
-            const maxMembers = 6; // Valor padrão, pode ser configurável no futuro
+            const maxMembers = GROUP_CONFIG.MAX_MEMBERS;
             
             return {
               id: group.id,
@@ -239,23 +244,7 @@ const Group = () => {
           if (itemsError) throw itemsError;
 
           // Transform the data to match our interface
-          const transformedItems = (itemsData || []).map((storageItem: any) => ({
-            id: storageItem.id,
-            name: storageItem.items.name,
-            description: storageItem.items.description || '',
-            quantity: storageItem.quantity,
-            slots: storageItem.items.slots_per_each,
-            price: storageItem.items.price,
-            category: storageItem.items.category,
-            attack_roll: storageItem.items.attack_roll,
-            damage: storageItem.items.damage,
-            crit: storageItem.items.crit,
-            range: storageItem.items.range,
-            damage_type: storageItem.items.damage_type,
-            armor_bonus: storageItem.items.armor_bonus,
-            armor_penalty: storageItem.items.armor_penalty,
-            effect: storageItem.items.effect,
-          }));
+          const transformedItems = (itemsData || []).map(transformGroupItem);
 
           setGroupChestItems(transformedItems);
         }
@@ -269,35 +258,6 @@ const Group = () => {
 
 
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'healthy':
-        return '#4ecca3';
-      case 'injured':
-        return '#f4a261';
-      case 'critical':
-        return '#e94560';
-      case 'unconscious':
-        return '#6c757d';
-      default:
-        return '#fff';
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'healthy':
-        return 'Saudável';
-      case 'injured':
-        return 'Ferido';
-      case 'critical':
-        return 'Crítico';
-      case 'unconscious':
-        return 'Inconsciente';
-      default:
-        return status;
-    }
-  };
 
 
 
@@ -346,50 +306,8 @@ const Group = () => {
 
       // Reload items
       const loadGroupStorage = async () => {
-        const { data: itemsData, error } = await supabase
-          .from('group_storage_items')
-          .select(`
-            id,
-            quantity,
-            items:item_id (
-              id,
-              name,
-              description,
-              price,
-              category,
-              slots_per_each,
-              attack_roll,
-              damage,
-              crit,
-              range,
-              damage_type,
-              armor_bonus,
-              armor_penalty,
-              effect
-            )
-          `)
-          .eq('storage_id', groupStorageId);
-
-        if (error) throw error;
-
-        const transformedItems = (itemsData || []).map((storageItem: any) => ({
-          id: storageItem.id,
-          name: storageItem.items.name,
-          description: storageItem.items.description || '',
-          quantity: storageItem.quantity,
-          slots: storageItem.items.slots_per_each,
-          price: storageItem.items.price,
-          category: storageItem.items.category,
-          attack_roll: storageItem.items.attack_roll,
-          damage: storageItem.items.damage,
-          crit: storageItem.items.crit,
-          range: storageItem.items.range,
-          damage_type: storageItem.items.damage_type,
-          armor_bonus: storageItem.items.armor_bonus,
-          armor_penalty: storageItem.items.armor_penalty,
-          effect: storageItem.items.effect,
-        }));
-
+        const itemsData = await loadGroupStorageItems(groupStorageId);
+        const transformedItems = itemsData.map(transformGroupItem);
         setGroupChestItems(transformedItems);
       };
 
@@ -602,13 +520,7 @@ const Group = () => {
       // Verificar se o grupo ainda tem vagas
       const { data: groupData, error: groupError } = await supabase
         .from('groups')
-        .select(`
-          *,
-          group_members (
-            id,
-            character_id
-          )
-        `)
+        .select(GROUP_WITH_MEMBERS_QUERY)
         .eq('id', groupId)
         .single();
 
@@ -755,66 +667,9 @@ const Group = () => {
                 {groupMembers.map(member => {
                   const character = member.character;
                   if (!character) return null;
-                  
-                  const hpPercentage = character.max_health > 0 
-                    ? (character.current_health / character.max_health) * 100 
-                    : 0;
-                  
-                  const status = hpPercentage > 75 ? 'healthy' : 
-                                hpPercentage > 50 ? 'injured' : 
-                                hpPercentage > 25 ? 'critical' : 'unconscious';
-                  
+
                   return (
-                    <div key={member.id} className="member-card">
-                      <div className="member-header">
-                        <div className="member-avatar">
-                          {character.profile_img ? (
-                            <img src={character.profile_img} alt={character.name} />
-                          ) : (
-                            <div className="avatar-placeholder">
-                              {character.name.charAt(0)}
-                            </div>
-                          )}
-                        </div>
-                        <div className="member-info">
-                          <h3 className="member-name">{character.name}</h3>
-                          <p className="member-details">
-                            {character.race} {character.class} - Nível {character.level}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="member-hp-section">
-                        <div className="hp-header">
-                          <span className="hp-label">Pontos de Vida</span>
-                          <span className="hp-values">
-                            {character.current_health} / {character.max_health}
-                          </span>
-                        </div>
-                        <div className="hp-bar">
-                          <div 
-                            className="hp-fill"
-                            style={{
-                              width: `${hpPercentage}%`,
-                              backgroundColor: getStatusColor(status)
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="member-status">
-                        <span 
-                          className="status-badge"
-                          style={{
-                            backgroundColor: `${getStatusColor(status)}20`,
-                            color: getStatusColor(status),
-                            borderColor: getStatusColor(status)
-                          }}
-                        >
-                          {getStatusLabel(status)}
-                        </span>
-                      </div>
-                    </div>
+                    <GroupMemberCard key={member.id} character={character} />
                   );
                 })}
               </div>
