@@ -43,9 +43,9 @@ interface GroupChestProps {
   onUpdateItemQuantity?: (itemId: string, newQuantity: number) => void;
 }
 
-const GroupChest = ({ 
-  arrows = 0, 
-  bullets = 0, 
+const GroupChest = ({
+  arrows: _arrows = 0,
+  bullets: _bullets = 0,
   items = [],
   onAddItem,
   onEditItem,
@@ -53,8 +53,8 @@ const GroupChest = ({
   onMoveToInventory,
   onSellItem,
   onConsumeItem,
-  onArrowsChange,
-  onBulletsChange,
+  onArrowsChange: _onArrowsChange,
+  onBulletsChange: _onBulletsChange,
   onUpdateItemQuantity
 }: GroupChestProps) => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
