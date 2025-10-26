@@ -18,6 +18,7 @@ import {
   joinGroupService,
   loadGroupStorageItems,
 } from '../../services/groupService';
+import { validateItemId, validateGroupId } from '../../utils/errorHandler';
 import './group.css';
 
 
@@ -341,8 +342,9 @@ const Group = () => {
   };
 
   const handleDeleteChestItem = async (itemId: string) => {
+    validateItemId(itemId, 'handleDeleteChestItem');
     if (!confirm('Tem certeza que deseja deletar este item?')) return;
-    
+
     try {
       const { error } = await supabase
         .from('group_storage_items')
@@ -394,6 +396,7 @@ const Group = () => {
   };
 
   const handleConsumeChestItem = async (itemId: string) => {
+    validateItemId(itemId, 'handleConsumeChestItem');
     try {
       const item = groupChestItems.find(i => i.id === itemId);
       if (!item) return;
@@ -423,6 +426,7 @@ const Group = () => {
   };
 
   const handleUpdateChestItemQuantity = async (itemId: string, newQuantity: number) => {
+    validateItemId(itemId, 'handleUpdateChestItemQuantity');
     try {
       const { error } = await supabase
         .from('group_storage_items')
