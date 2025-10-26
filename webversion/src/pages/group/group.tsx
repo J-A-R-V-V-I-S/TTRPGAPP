@@ -325,8 +325,19 @@ const Group = () => {
   };
 
   const handleEditChestItem = (itemId: string) => {
+    /**
+     * FUTURE ENHANCEMENT: Group Chest Item Editing
+     *
+     * Allow group members to edit chest item properties (name, description, quantity).
+     * Implementation requires:
+     * - Create ChestItemEditModal component
+     * - Add permissions check (who can edit group items?)
+     * - Update group_storage_items table
+     * - Broadcast changes to all group members
+     *
+     * Complexity: Low | Priority: Medium
+     */
     console.log('Editar item do baú:', itemId);
-    // TODO: Implementar modal de edição de item
   };
 
   const handleDeleteChestItem = async (itemId: string) => {
@@ -348,13 +359,38 @@ const Group = () => {
   };
 
   const handleMoveToInventory = (itemId: string) => {
+    /**
+     * FUTURE ENHANCEMENT: Transfer Items from Group Chest to Character Inventory
+     *
+     * Allow characters to take items from group storage to their personal inventory.
+     * Implementation requires:
+     * - Check character inventory capacity (max_inventory_slots)
+     * - Remove item from group_storage_items
+     * - Add item to character_items
+     * - Update current_load in characters table
+     * - Transaction log for audit trail
+     * - Permission check (can this character take items?)
+     *
+     * Complexity: High | Priority: Medium
+     */
     console.log('Mover item para o inventário:', itemId);
-    // TODO: Implementar lógica de movimentação de item
   };
 
   const handleSellChestItem = (itemId: string) => {
+    /**
+     * FUTURE ENHANCEMENT: Sell Group Chest Items
+     *
+     * Allow selling items from group chest and adding gold to group currency.
+     * Implementation requires:
+     * - Calculate sell price (item.value / 2 or custom pricing)
+     * - Remove item from group_storage_items
+     * - Add currency to group currency system
+     * - Create transaction record
+     * - Permission check (who can sell group items?)
+     *
+     * Complexity: Medium | Priority: Low
+     */
     console.log('Vender item do baú:', itemId);
-    // TODO: Implementar lógica de venda de item
   };
 
   const handleConsumeChestItem = async (itemId: string) => {
@@ -405,13 +441,31 @@ const Group = () => {
   };
 
   const handleChestArrowsChange = (newValue: number) => {
+    /**
+     * FUTURE ENHANCEMENT: Group Ammunition Management
+     *
+     * Track arrows in group storage separate from character inventory.
+     * Implementation requires:
+     * - Add 'arrows' and 'bullets' fields to group_storage table
+     * - Update group storage record when ammunition changes
+     * - Allow transfer between group storage and character inventory
+     * - Consider ammunition consumption tracking
+     *
+     * Complexity: Low | Priority: Low
+     */
     console.log('Flechas do baú alteradas:', newValue);
-    // TODO: Implementar lógica de atualização de flechas do grupo
   };
 
   const handleChestBulletsChange = (newValue: number) => {
+    /**
+     * FUTURE ENHANCEMENT: Group Ammunition Management
+     *
+     * Track bullets in group storage separate from character inventory.
+     * See handleChestArrowsChange for implementation details.
+     *
+     * Complexity: Low | Priority: Low
+     */
     console.log('Balas do baú alteradas:', newValue);
-    // TODO: Implementar lógica de atualização de balas do grupo
   };
 
   // Função para atualizar as moedas do grupo

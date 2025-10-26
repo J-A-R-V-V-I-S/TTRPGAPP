@@ -158,7 +158,19 @@ const Combat = () => {
   const [aprimoramentoApplications, setAprimoramentoApplications] = useState<Record<string, number>>({});
 
   const toggleSpellPrepared = (spellId: string) => {
-    // TODO: Implement spell preparation functionality
+    /**
+     * FUTURE ENHANCEMENT: Spell Preparation System
+     *
+     * D&D mechanic where spellcasters prepare a limited number of spells per day.
+     * Implementation requires:
+     * - Add 'prepared' boolean field to character_spells table
+     * - Add max_prepared_spells calculation based on class/level
+     * - UI toggle for marking spells as prepared
+     * - Validation to prevent over-preparation
+     *
+     * Complexity: Medium | Priority: Low
+     * Tracked in: Future backlog
+     */
     console.log('Toggle spell prepared:', spellId);
   };
 
@@ -407,15 +419,15 @@ const Combat = () => {
                   <p>Carregando dados do personagem...</p>
                 </div>
               )}
-              <DefenseBar 
+              <DefenseBar
                 dexterityBonus={character?.defence_attribute_bonus || 0}
                 armorBonus={character?.defence_armor_bonus || 0}
-                shieldBonus={0} // TODO: Implement shield bonus from equipment
+                shieldBonus={0} /* FUTURE: Calculate from equipped items with type='shield' in inventory */
                 otherBonus={character?.defence_other || 0}
                 baseDefense={character?.defence_base || 10}
                 onDexterityChange={updateDefenseAttributeBonus}
                 onArmorChange={updateDefenseArmorBonus}
-                onShieldChange={() => {}} // TODO: Implement shield bonus update
+                onShieldChange={() => {}} /* FUTURE: Add updateDefenseShieldBonus handler when shield system is implemented */
                 onOtherChange={updateDefenseOther}
               />
             </div>
