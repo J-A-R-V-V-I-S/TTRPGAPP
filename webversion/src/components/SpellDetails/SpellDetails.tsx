@@ -21,26 +21,26 @@ interface Spell {
   escola: string;
   execucao: string;
   alcance: string;
-  area: string;
+  area?: string;
   duracao: string;
   resistencia: string;
-  efeito: string;
+  efeito?: string;
   aprimoramentos: Aprimoramento[];
 }
 
 interface SpellDetailsProps {
   spell: Spell;
   aprimoramentoApplications: Record<string, number>;
-  onUpdateField: (spellId: string, field: string, value: string) => void;
+  onUpdateField: (spellId: string, field: any, value: string | boolean) => void | Promise<void>;
   onUpdateAprimoramento: (
     spellId: string,
     aprimoramentoId: string,
-    field: string,
-    value: any
-  ) => void;
+    field: any,
+    value: string | number | boolean
+  ) => void | Promise<void>;
   onIncrementAplicacoes: (spellId: string, aprimoramentoId: string) => void;
   onDecrementAplicacoes: (spellId: string, aprimoramentoId: string) => void;
-  onRemoveAprimoramento: (spellId: string, aprimoramentoId: string) => void;
+  onRemoveAprimoramento: (spellId: string, aprimoramentoId: string) => void | Promise<void>;
   onAddAprimoramento: (spellId: string) => void;
   openMenuId: string | null;
   onToggleMenu: (menuId: string, e: React.MouseEvent) => void;
@@ -122,7 +122,7 @@ const SpellDetails = ({
           <div className="editable-stat">
             <input
               type="text"
-              value={spell.area}
+              value={spell.area || ''}
               onChange={(e) => onUpdateField(spell.id, 'area', e.target.value)}
               className="area-input"
               placeholder="Ex: Esfera de 6m"
@@ -159,7 +159,7 @@ const SpellDetails = ({
         <h3>Efeito</h3>
         <div className="editable-stat">
           <textarea
-            value={spell.efeito}
+            value={spell.efeito || ''}
             onChange={(e) => onUpdateField(spell.id, 'efeito', e.target.value)}
             className="efeito-textarea"
             placeholder="Descrição do efeito da magia..."

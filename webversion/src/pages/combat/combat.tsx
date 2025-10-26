@@ -3,8 +3,6 @@ import Navbar from '../../components/navbar/navbar';
 import HealthBar from '../../components/healthBar/healthBar';
 import ManaBar from '../../components/manaBar/manaBar';
 import DefenseBar from '../../components/defenseBar/defenseBar';
-import TabbedItemList from '../../components/tabbedItemList/tabbedItemList';
-import type { TabData } from '../../components/tabbedItemList/tabbedItemList';
 import Modal from '../../components/modal/modal';
 import AttackForm from '../../components/modal/forms/AttackForm';
 import SpellForm from '../../components/modal/forms/SpellForm';
@@ -20,7 +18,6 @@ import SpellDetails from '../../components/SpellDetails/SpellDetails';
 import AprimoramentoForm from '../../components/AprimoramentoForm/AprimoramentoForm';
 import SkillsSection from '../../components/SkillsSection/SkillsSection';
 import { generateSkillsTabData } from '../../utils/combatHelpers';
-import type { Skill, AbilityTabType as SkillTabType } from '../../utils/combatHelpers';
 import './combat.css';
 
 type TabType = 'attacks' | 'spells';
@@ -248,11 +245,6 @@ const Combat = () => {
     }));
   };
 
-  const calculateTotalCost = (spellId: string, aprimoramento: Aprimoramento): number => {
-    const key = `${spellId}-${aprimoramento.id}`;
-    const applications = aprimoramentoApplications[key] || 0;
-    return aprimoramento.custoAdicionalPM * (aprimoramento.reaplicavel ? applications : 1);
-  };
 
   const handleAddSkill = (tabKey: AbilityTabType) => {
     if (tabKey === 'abilities') {
@@ -376,7 +368,7 @@ const Combat = () => {
 
 
   // Tab data for abilities and powers section
-  const skillsTabData: TabData<AbilityTabType, Skill> = useMemo(
+  const skillsTabData = useMemo(
     () =>
       generateSkillsTabData(abilities, powers, {
         handleEditSkill,
@@ -598,304 +590,27 @@ const Combat = () => {
               {/* Spell Details */}
               {activeTab === 'spells' && selectedSpell && (
                 <>
-                  <div className="details-header">
-                    <div className="editable-title">
-                      <input 
-                        type="text" 
-                        value={selectedSpell.name}
-                        onChange={(e) => handleUpdateSpellField(selectedSpell.id, 'name', e.target.value)}
-                        className="spell-name-input"
-                        placeholder="Nome da magia"
-                      />
-                    </div>
-                    <span className="details-level">{selectedSpell.escola}</span>
-                  </div>
-                  
-                  <div className="details-stats">
-                    <div className="stat-row">
-                      <strong>Escola:</strong>
-                      <div className="editable-stat">
-                        <input 
-                          type="text" 
-                          value={selectedSpell.escola}
-                          onChange={(e) => handleUpdateSpellField(selectedSpell.id, 'escola', e.target.value)}
-                          className="escola-input"
-                          placeholder="Ex: Evocação"
-                        />
-                      </div>
-                    </div>
-                    <div className="stat-row">
-                      <strong>Execução:</strong>
-                      <div className="editable-stat">
-                        <input 
-                          type="text" 
-                          value={selectedSpell.execucao}
-                          onChange={(e) => handleUpdateSpellField(selectedSpell.id, 'execucao', e.target.value)}
-                          className="execucao-input"
-                          placeholder="Ex: 1 ação"
-                        />
-                      </div>
-                    </div>
-                    <div className="stat-row">
-                      <strong>Alcance:</strong>
-                      <div className="editable-stat">
-                        <input 
-                          type="text" 
-                          value={selectedSpell.alcance}
-                          onChange={(e) => handleUpdateSpellField(selectedSpell.id, 'alcance', e.target.value)}
-                          className="alcance-input"
-                          placeholder="Ex: 36 metros"
-                        />
-                      </div>
-                    </div>
-                    <div className="stat-row">
-                      <strong>Área:</strong>
-                      <div className="editable-stat">
-                        <input 
-                          type="text" 
-                          value={selectedSpell.area}
-                          onChange={(e) => handleUpdateSpellField(selectedSpell.id, 'area', e.target.value)}
-                          className="area-input"
-                          placeholder="Ex: Esfera de 6m"
-                        />
-                      </div>
-                    </div>
-                    <div className="stat-row">
-                      <strong>Duração:</strong>
-                      <div className="editable-stat">
-                        <input 
-                          type="text" 
-                          value={selectedSpell.duracao}
-                          onChange={(e) => handleUpdateSpellField(selectedSpell.id, 'duracao', e.target.value)}
-                          className="duracao-input"
-                          placeholder="Ex: Instantâneo"
-                        />
-                      </div>
-                    </div>
-                    <div className="stat-row">
-                      <strong>Resistência:</strong>
-                      <div className="editable-stat">
-                        <input 
-                          type="text" 
-                          value={selectedSpell.resistencia}
-                          onChange={(e) => handleUpdateSpellField(selectedSpell.id, 'resistencia', e.target.value)}
-                          className="resistencia-input"
-                          placeholder="Ex: Destreza (meio dano)"
-                        />
-                      </div>
-                    </div>
-                  </div>
+                  <SpellDetails
+                    spell={selectedSpell}
+                    aprimoramentoApplications={aprimoramentoApplications}
+                    onUpdateField={handleUpdateSpellField}
+                    onUpdateAprimoramento={handleUpdateAprimoramento}
+                    onIncrementAplicacoes={handleIncrementAplicacoes}
+                    onDecrementAplicacoes={handleDecrementAplicacoes}
+                    onRemoveAprimoramento={handleRemoveAprimoramento}
+                    onAddAprimoramento={handleAddAprimoramento}
+                    openMenuId={openMenuId}
+                    onToggleMenu={toggleMenu}
+                    onCloseMenu={() => setOpenMenuId(null)}
+                  />
 
-                  <div className="details-description">
-                    <h3>Efeito</h3>
-                    <div className="editable-stat">
-                      <textarea 
-                        value={selectedSpell.efeito}
-                        onChange={(e) => handleUpdateSpellField(selectedSpell.id, 'efeito', e.target.value)}
-                        className="efeito-textarea"
-                        placeholder="Descrição do efeito da magia..."
-                        rows={4}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Seção de Aprimoramentos */}
-                  <div className="aprimoramentos-section">
-                    <div className="aprimoramentos-header">
-                      <h3>Aprimoramentos</h3>
-                    </div>
-                    
-                    {selectedSpell.aprimoramentos.length > 0 ? (
-                      <div className="aprimoramentos-list">
-                        {selectedSpell.aprimoramentos.map((aprimoramento) => (
-                          <div key={aprimoramento.id} className="aprimoramento-item">
-                            <div className="aprimoramento-header">
-                              <div className="aprimoramento-info">
-                                <div className="aprimoramento-cost-info">
-                                  <div className="custo-base-section">
-                                    <span className="custo-base-label">Custo Base:</span>
-                                    <span className="custo-base-value">{aprimoramento.custoAdicionalPM || 0} PM</span>
-                                  </div>
-                                  {aprimoramento.reaplicavel && (
-                                    <div className="custo-total-section">
-                                      <span className="custo-total-label">Total:</span>
-                                      <span className="custo-total-value">{calculateTotalCost(selectedSpell.id, aprimoramento)} PM</span>
-                                    </div>
-                                  )}
-                                  {aprimoramento.reaplicavel && (
-                                    <span className="reaplicavel-badge">Reaplicável</span>
-                                  )}
-                                </div>
-                                
-                                {aprimoramento.reaplicavel && (
-                                  <div className="aplicacoes-counter">
-                                    <span className="aplicacoes-label">Aplicações:</span>
-                                    <div className="counter-controls">
-                                      <button 
-                                        className="counter-btn counter-minus"
-                                        onClick={() => handleDecrementAplicacoes(selectedSpell.id, aprimoramento.id)}
-                                        disabled={(aprimoramentoApplications[`${selectedSpell.id}-${aprimoramento.id}`] || 0) <= 0}
-                                      >
-                                        −
-                                      </button>
-                                      <span className="counter-value">{aprimoramentoApplications[`${selectedSpell.id}-${aprimoramento.id}`] || 0}</span>
-                                      <button 
-                                        className="counter-btn counter-plus"
-                                        onClick={() => handleIncrementAplicacoes(selectedSpell.id, aprimoramento.id)}
-                                      >
-                                        +
-                                      </button>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                              
-                              <div className="item-menu-container">
-                                <button 
-                                  className="item-menu-btn"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleMenu(`aprimoramento-${aprimoramento.id}`, e);
-                                  }}
-                                >
-                                  ⋮
-                                </button>
-                                {openMenuId === `aprimoramento-${aprimoramento.id}` && (
-                                  <div className="item-menu-dropdown">
-                                    <button 
-                                      className="menu-option"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setOpenMenuId(null);
-                                        // Edit mode is already enabled in spell details
-                                      }}
-                                    >
-                                      ✏️ Editar
-                                    </button>
-                                    <button 
-                                      className="menu-option delete"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleRemoveAprimoramento(selectedSpell.id, aprimoramento.id);
-                                        setOpenMenuId(null);
-                                      }}
-                                    >
-                                      🗑️ Deletar
-                                    </button>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                            
-                            <div className="aprimoramento-description">
-                              <label>Descrição:</label>
-                              <textarea 
-                                value={aprimoramento.descricao}
-                                onChange={(e) => handleUpdateAprimoramento(
-                                  selectedSpell.id, 
-                                  aprimoramento.id, 
-                                  'descricao', 
-                                  e.target.value
-                                )}
-                                className="aprimoramento-textarea"
-                                placeholder="Descrição do aprimoramento..."
-                                rows={2}
-                              />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="no-aprimoramentos">
-                        <p>Nenhum aprimoramento adicionado ainda.</p>
-                      </div>
-                    )}
-                    
-                    <button 
-                      className="btn-add-aprimoramento"
-                      onClick={() => handleAddAprimoramento(selectedSpell.id)}
-                    >
-                      + Adicionar Aprimoramento
-                    </button>
-                  </div>
-
-                  {/* Modal para Criar Aprimoramento */}
-                  {showAprimoramentoForm && (
-                    <div className="aprimoramento-modal-overlay">
-                      <div className="aprimoramento-modal">
-                        <div className="modal-header">
-                          <h3>Novo Aprimoramento</h3>
-                          <button 
-                            className="modal-close-btn"
-                            onClick={handleCancelAprimoramento}
-                          >
-                            ×
-                          </button>
-                        </div>
-                        
-                        <div className="modal-content">
-                          <div className="modal-field">
-                            <label>Custo Base (PM):</label>
-                            <input 
-                              type="number" 
-                              value={newAprimoramentoData.custoAdicionalPM}
-                              onChange={(e) => setNewAprimoramentoData(prev => ({
-                                ...prev,
-                                custoAdicionalPM: parseInt(e.target.value) || 1
-                              }))}
-                              className="modal-input"
-                              min="1"
-                            />
-                          </div>
-                          
-                          <div className="modal-field">
-                            <label className="modal-checkbox-label">
-                              <input 
-                                type="checkbox" 
-                                checked={newAprimoramentoData.reaplicavel}
-                                onChange={(e) => setNewAprimoramentoData(prev => ({
-                                  ...prev,
-                                  reaplicavel: e.target.checked
-                                }))}
-                                className="modal-checkbox"
-                              />
-                              Reaplicável (pode ser usado múltiplas vezes)
-                            </label>
-                          </div>
-                          
-                          <div className="modal-field">
-                            <label>Descrição:</label>
-                            <textarea 
-                              value={newAprimoramentoData.descricao}
-                              onChange={(e) => setNewAprimoramentoData(prev => ({
-                                ...prev,
-                                descricao: e.target.value
-                              }))}
-                              className="modal-textarea"
-                              placeholder="Descrição do aprimoramento..."
-                              rows={3}
-                            />
-                          </div>
-                        </div>
-                        
-                        <div className="modal-actions">
-                          <button 
-                            className="modal-btn modal-cancel"
-                            onClick={handleCancelAprimoramento}
-                          >
-                            Cancelar
-                          </button>
-                          <button 
-                            className="modal-btn modal-create"
-                            onClick={handleCreateAprimoramento}
-                          >
-                            Criar Aprimoramento
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
+                  <AprimoramentoForm
+                    isOpen={showAprimoramentoForm}
+                    newAprimoramentoData={newAprimoramentoData}
+                    onUpdateData={(data) => setNewAprimoramentoData(prev => ({ ...prev, ...data }))}
+                    onCancel={handleCancelAprimoramento}
+                    onCreate={handleCreateAprimoramento}
+                  />
                 </>
               )}
 
@@ -925,26 +640,11 @@ const Combat = () => {
           </div>
 
           {/* Abilities and Powers Section */}
-          <TabbedItemList
-            key={`abilities-${abilities.length}-powers-${powers.length}-${tabbedListRefreshKey}`}
-            title="Habilidades e Poderes"
-            titleIcon={
-              <svg 
-                width="28" 
-                height="28" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-              </svg>
-            }
-            tabData={skillsTabData}
-            defaultTab="abilities"
-            colorScheme="orange"
+          <SkillsSection
+            abilities={abilities}
+            powers={powers}
+            skillsTabData={skillsTabData}
+            tabbedListRefreshKey={tabbedListRefreshKey}
           />
         </div>
 

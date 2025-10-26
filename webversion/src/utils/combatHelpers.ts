@@ -5,7 +5,6 @@
  * Extracted from combat.tsx to eliminate duplication and improve testability.
  */
 
-import type { TabData } from '../components/tabbedItemList/tabbedItemList';
 
 /**
  * Aprimoramento (Enhancement) interface
@@ -24,9 +23,9 @@ export interface Aprimoramento {
 export interface Skill {
   id: string;
   name: string;
-  description: string;
+  description?: string;
   category?: string;
-  type: string;
+  type?: string;
   cost?: string;
   prerequisites?: string;
   cooldown?: string;
@@ -71,7 +70,7 @@ export const generateSkillsTabData = (
     handleAddSkill: (tabKey: AbilityTabType) => void;
     handleUpdateSkillDescription: (skillId: string, tabKey: AbilityTabType, newDescription: string) => void;
   }
-): TabData<AbilityTabType, Skill> => ({
+): any => ({
   tabs: [
     { key: 'abilities', label: 'Habilidades', icon: '⚡' },
     { key: 'powers', label: 'Poderes', icon: '✨' },
@@ -80,7 +79,7 @@ export const generateSkillsTabData = (
     abilities,
     powers,
   },
-  getItemFields: (skill) => {
+  getItemFields: (skill: Skill) => {
     const fields = [];
 
     if (skill.category || skill.type) {
@@ -105,7 +104,7 @@ export const generateSkillsTabData = (
 
     return fields;
   },
-  getActionButtons: (skill, tabKey) => [
+  getActionButtons: (skill: Skill, tabKey: AbilityTabType) => [
     {
       label: '✏️ Editar',
       onClick: () => handlers.handleEditSkill(skill, tabKey),
@@ -118,7 +117,7 @@ export const generateSkillsTabData = (
       show: true,
     },
   ],
-  getNoSelectionMessage: (tabKey) =>
+  getNoSelectionMessage: (tabKey: AbilityTabType) =>
     tabKey === 'abilities'
       ? 'Selecione uma habilidade para ver os detalhes'
       : 'Selecione um poder para ver os detalhes',

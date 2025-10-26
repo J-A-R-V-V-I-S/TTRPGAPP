@@ -6,7 +6,6 @@
  */
 
 import TabbedItemList from '../tabbedItemList/tabbedItemList';
-import type { TabData } from '../tabbedItemList/tabbedItemList';
 
 interface Skill {
   id: string;
@@ -20,12 +19,10 @@ interface Skill {
   effect?: string;
 }
 
-type AbilityTabType = 'abilities' | 'powers';
-
 interface SkillsSectionProps {
   abilities: Skill[];
   powers: Skill[];
-  skillsTabData: TabData<AbilityTabType, Skill>;
+  skillsTabData: any;
   tabbedListRefreshKey: number;
 }
 
@@ -54,7 +51,7 @@ const SkillsSection = ({
             <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
           </svg>
         }
-        tabData={skillsTabData}
+        tabData={skillsTabData as any}
         defaultTab="abilities"
         colorScheme="orange"
       />
