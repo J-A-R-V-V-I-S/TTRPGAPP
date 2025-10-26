@@ -82,7 +82,7 @@ const NoteForm = ({ onSubmit, onCancel, initialData }: NoteFormProps) => {
       dataToSubmit.title = formData.title.trim();
     }
 
-      if (formData.category && formData.category !== '') {
+      if (formData.category) {
         dataToSubmit.category = formData.category;
       }
 
