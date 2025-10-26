@@ -28,16 +28,22 @@ const RACES = [
   { id: 'gnome', name: 'Gnomo', description: 'Curioso e inteligente' },
 ];
 
-// Classes disponíveis
+// Classes disponíveis (Tormenta RPG)
 const CLASSES = [
-  { id: 'warrior', name: 'Guerreiro', description: 'Especialista em combate corpo a corpo' },
-  { id: 'mage', name: 'Mago', description: 'Mestre das artes arcanas' },
-  { id: 'rogue', name: 'Ladino', description: 'Furtivo e habilidoso' },
-  { id: 'cleric', name: 'Clérigo', description: 'Servo divino e curador' },
-  { id: 'ranger', name: 'Patrulheiro', description: 'Caçador e rastreador' },
-  { id: 'paladin', name: 'Paladino', description: 'Guerreiro sagrado' },
-  { id: 'barbarian', name: 'Bárbaro', description: 'Lutador selvagem e furioso' },
-  { id: 'bard', name: 'Bardo', description: 'Artista e versátil' },
+  { id: 'arcanista', name: 'Arcanista', description: 'Mestre das artes arcanas e magias' },
+  { id: 'barbaro', name: 'Bárbaro', description: 'Lutador selvagem e furioso' },
+  { id: 'bardo', name: 'Bardo', description: 'Artista versátil e inspirador' },
+  { id: 'bucaneiro', name: 'Bucaneiro', description: 'Aventureiro dos mares e combatente ágil' },
+  { id: 'cacador', name: 'Caçador', description: 'Rastreador experiente e mestre do combate à distância' },
+  { id: 'cavaleiro', name: 'Cavaleiro', description: 'Guerreiro montado e protetor' },
+  { id: 'clerigo', name: 'Clérigo', description: 'Servo divino e curador' },
+  { id: 'druida', name: 'Druida', description: 'Guardião da natureza e metamorfo' },
+  { id: 'guerreiro', name: 'Guerreiro', description: 'Especialista em combate e armas' },
+  { id: 'inventor', name: 'Inventor', description: 'Criador de dispositivos e engenhocas' },
+  { id: 'ladino', name: 'Ladino', description: 'Furtivo, habilidoso e astuto' },
+  { id: 'lutador', name: 'Lutador', description: 'Mestre do combate desarmado' },
+  { id: 'nobre', name: 'Nobre', description: 'Líder carismático e influente' },
+  { id: 'paladino', name: 'Paladino', description: 'Guerreiro sagrado e campeão da justiça' },
 ];
 
 // Origens disponíveis
