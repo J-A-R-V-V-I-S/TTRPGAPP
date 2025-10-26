@@ -14,9 +14,6 @@ import { useCharacter } from '../../contexts/CharacterContext';
 import { useCombat } from '../../contexts/CombatContext';
 import AttacksList from '../../components/AttacksList/AttacksList';
 import SpellsList from '../../components/SpellsList/SpellsList';
-import SpellDetails from '../../components/SpellDetails/SpellDetails';
-import AprimoramentoForm from '../../components/AprimoramentoForm/AprimoramentoForm';
-import SkillsSection from '../../components/SkillsSection/SkillsSection';
 import { generateSkillsTabData } from '../../utils/combatHelpers';
 import './combat.css';
 
