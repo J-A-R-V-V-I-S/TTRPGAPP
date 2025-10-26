@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(claude mcp add:*)",
+      "mcp__supabase__list_tables",
+      "mcp__archon__manage_project",
+      "mcp__archon__manage_task",
+      "mcp__supabase__get_project_url",
+      "mcp__supabase__get_advisors",
+      "mcp__archon__manage_document",
+      "mcp__archon__find_tasks",
+      "Bash(tree:*)",
+      "mcp__supabase__execute_sql",
+      "mcp__archon__find_projects",
+      "Bash(git fetch:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
