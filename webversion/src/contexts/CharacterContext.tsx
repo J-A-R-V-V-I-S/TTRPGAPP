@@ -196,19 +196,19 @@ export const CharacterProvider = ({ children }: CharacterProviderProps) => {
   // Specific update functions (using generic updateField)
   // Factory function to create simple field updaters
   // Eliminates repetitive wrapper functions - Clean Code Pattern
-  const createFieldUpdater = (fieldName: string) => async (value: any) => {
+  const createFieldUpdater = useCallback((fieldName: string) => async (value: any) => {
     await updateField(fieldName, value);
-  };
+  }, [updateField]);
 
-  const updateDescription = createFieldUpdater('description');
-  const updateBackstory = createFieldUpdater('backstory');
-  const updateBackstorySecret = createFieldUpdater('is_backstory_secret');
-  const updateProficienciesAndHabilities = createFieldUpdater('proficiencies_and_habilities');
-  const updateArrows = createFieldUpdater('arrows');
-  const updateBullets = createFieldUpdater('bullets');
-  const updateMaxInventorySlots = createFieldUpdater('max_inventory_slots');
-  const updateCurrentLoad = createFieldUpdater('current_load');
-  const updateMovement = createFieldUpdater('movement');
+  const updateDescription = useCallback(createFieldUpdater('description'), [createFieldUpdater]);
+  const updateBackstory = useCallback(createFieldUpdater('backstory'), [createFieldUpdater]);
+  const updateBackstorySecret = useCallback(createFieldUpdater('is_backstory_secret'), [createFieldUpdater]);
+  const updateProficienciesAndHabilities = useCallback(createFieldUpdater('proficiencies_and_habilities'), [createFieldUpdater]);
+  const updateArrows = useCallback(createFieldUpdater('arrows'), [createFieldUpdater]);
+  const updateBullets = useCallback(createFieldUpdater('bullets'), [createFieldUpdater]);
+  const updateMaxInventorySlots = useCallback(createFieldUpdater('max_inventory_slots'), [createFieldUpdater]);
+  const updateCurrentLoad = useCallback(createFieldUpdater('current_load'), [createFieldUpdater]);
+  const updateMovement = useCallback(createFieldUpdater('movement'), [createFieldUpdater]);
 
   const updateHealth = async (current: number, max?: number, temporary?: number) => {
     const updates: any = { current_health: current };
@@ -224,8 +224,8 @@ export const CharacterProvider = ({ children }: CharacterProviderProps) => {
     await updateFields(updates);
   };
 
-  const updateProfileImage = createFieldUpdater('profile_img');
-  const updateBackgroundImage = createFieldUpdater('background_img');
+  const updateProfileImage = useCallback(createFieldUpdater('profile_img'), [createFieldUpdater]);
+  const updateBackgroundImage = useCallback(createFieldUpdater('background_img'), [createFieldUpdater]);
 
   // Update level and skills half_level
   const updateLevel = async (newLevel: number) => {
@@ -260,11 +260,11 @@ export const CharacterProvider = ({ children }: CharacterProviderProps) => {
   };
 
   // Defense management functions - using factory pattern
-  const updateDefenseBase = createFieldUpdater('defence_base');
-  const updateDefenseArmorBonus = createFieldUpdater('defence_armor_bonus');
-  const updateDefenseAttributeBonus = createFieldUpdater('defence_attribute_bonus');
-  const updateDefenseOther = createFieldUpdater('defence_other');
-  const updateDefenseArmorPenalty = createFieldUpdater('defence_armor_penalty');
+  const updateDefenseBase = useCallback(createFieldUpdater('defence_base'), [createFieldUpdater]);
+  const updateDefenseArmorBonus = useCallback(createFieldUpdater('defence_armor_bonus'), [createFieldUpdater]);
+  const updateDefenseAttributeBonus = useCallback(createFieldUpdater('defence_attribute_bonus'), [createFieldUpdater]);
+  const updateDefenseOther = useCallback(createFieldUpdater('defence_other'), [createFieldUpdater]);
+  const updateDefenseArmorPenalty = useCallback(createFieldUpdater('defence_armor_penalty'), [createFieldUpdater]);
 
   const value = {
     character,

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Navbar from '../../components/navbar/navbar';
 import HealthBar from '../../components/healthBar/healthBar';
 import ManaBar from '../../components/manaBar/manaBar';
@@ -246,13 +246,13 @@ const Combat = () => {
   };
 
 
-  const handleAddSkill = (tabKey: AbilityTabType) => {
+  const handleAddSkill = useCallback((tabKey: AbilityTabType) => {
     if (tabKey === 'abilities') {
       setAbilityModalOpen(true);
     } else {
       setPowerModalOpen(true);
     }
-  };
+  }, []);
 
   const handleAddCombatItem = (type: TabType) => {
     if (type === 'attacks') {
@@ -333,7 +333,7 @@ const Combat = () => {
   };
 
   // Handlers for abilities and powers
-  const handleDeleteSkill = async (skillId: string, tabKey: AbilityTabType) => {
+  const handleDeleteSkill = useCallback(async (skillId: string, tabKey: AbilityTabType) => {
     try {
       if (tabKey === 'abilities') {
         await deleteAbility(skillId);
@@ -344,17 +344,17 @@ const Combat = () => {
     } catch (error) {
       console.error('Erro ao deletar habilidade/poder:', error);
     }
-  };
+  }, [deleteAbility, deletePower]);
 
-  const handleEditSkill = (skill: any, tabKey: AbilityTabType) => {
+  const handleEditSkill = useCallback((skill: any, tabKey: AbilityTabType) => {
     if (tabKey === 'abilities') {
       handleEditAbility(skill);
     } else {
       handleEditPower(skill);
     }
-  };
+  }, [handleEditAbility, handleEditPower]);
 
-  const handleUpdateSkillDescription = async (skillId: string, tabKey: AbilityTabType, newDescription: string) => {
+  const handleUpdateSkillDescription = useCallback(async (skillId: string, tabKey: AbilityTabType, newDescription: string) => {
     try {
       if (tabKey === 'abilities') {
         await updateAbility(skillId, { description: newDescription });
@@ -364,7 +364,7 @@ const Combat = () => {
     } catch (error) {
       console.error('Erro ao atualizar descrição:', error);
     }
-  };
+  }, [updateAbility, updatePower]);
 
 
   // Tab data for abilities and powers section
@@ -376,7 +376,7 @@ const Combat = () => {
         handleAddSkill,
         handleUpdateSkillDescription,
       }),
-    [abilities, powers]
+    [abilities, powers, handleEditSkill, handleDeleteSkill, handleAddSkill, handleUpdateSkillDescription]
   );
 
   return (

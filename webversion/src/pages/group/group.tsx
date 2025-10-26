@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Navbar from '../../components/navbar/navbar';
 import GroupChest from '../../components/groupChest/groupChest';
 import GroupCurrency from '../../components/currency/GroupCurrency';
@@ -74,6 +74,13 @@ const Group = () => {
   const [joinMessage, setJoinMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
   const [groupChestItems, setGroupChestItems] = useState<any[]>([]);
   const [groupStorageId, setGroupStorageId] = useState<string | null>(null);
+
+  // Memoized average level calculation - Performance optimization
+  const averageLevel = useMemo(() => {
+    if (groupMembers.length === 0) return 0;
+    const totalLevel = groupMembers.reduce((acc, m) => acc + (m.character?.level || 0), 0);
+    return Math.round(totalLevel / groupMembers.length);
+  }, [groupMembers]);
 
   // Verificar se o personagem está em um grupo e carregar grupos disponíveis
   useEffect(() => {
@@ -654,10 +661,7 @@ const Group = () => {
                   <div className="stat-item">
                     <span className="stat-label">Nível Médio:</span>
                     <span className="stat-value">
-                      {groupMembers.length > 0 
-                        ? Math.round(groupMembers.reduce((acc, m) => acc + (m.character?.level || 0), 0) / groupMembers.length)
-                        : 0
-                      }
+                      {averageLevel}
                     </span>
                   </div>
                 </div>
