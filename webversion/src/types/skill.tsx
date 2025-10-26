@@ -1,6 +1,8 @@
 import type { AttributeName } from './types';
 
 interface Skill {
+    id?: string;
+    characterId?: string;
     name: string;
     attribute: AttributeName;
     isTrained: boolean;

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Navbar from '../../components/navbar/navbar';
 import { useCharacter } from '../../contexts/CharacterContext';
+import { useAttributes } from '../../contexts/AttributesContext';
 import type { CharacterAttributes } from '../../types/character_attributes';
 import AddCraftModal from '../../components/modal/forms/AddCraftModal';
 import './attributes.css';
@@ -29,7 +30,8 @@ interface Skill {
 }
 
 const Attributes = () => {
-  const { character, updateAttributes, updateSkill, refreshSkills } = useCharacter();
+  const { character } = useCharacter();
+  const { attributes: characterAttributes, skills: characterSkills, updateAttributes, updateSkill, refreshSkills } = useAttributes();
   const [skillSearch, setSkillSearch] = useState('');
   const [showAddCraftModal, setShowAddCraftModal] = useState(false);
   const [attributes, setAttributes] = useState<Attribute[]>([
@@ -41,19 +43,19 @@ const Attributes = () => {
     { name: 'Car', dbField: 'carisma', value: 10, modifier: 0 }
   ]);
 
-  // Load attributes from character context
+  // Load attributes from attributes context
   useEffect(() => {
-    if (character?.attributes) {
+    if (characterAttributes) {
       setAttributes([
-        { name: 'For', dbField: 'forca', value: character.attributes.forca, modifier: character.attributes.forcaTempMod || 0 },
-        { name: 'Des', dbField: 'destreza', value: character.attributes.destreza, modifier: character.attributes.destrezaTempMod || 0 },
-        { name: 'Con', dbField: 'constituicao', value: character.attributes.constituicao, modifier: character.attributes.constituicaoTempMod || 0 },
-        { name: 'Int', dbField: 'inteligencia', value: character.attributes.inteligencia, modifier: character.attributes.inteligenciaTempMod || 0 },
-        { name: 'Sab', dbField: 'sabedoria', value: character.attributes.sabedoria, modifier: character.attributes.sabedoriaTempMod || 0 },
-        { name: 'Car', dbField: 'carisma', value: character.attributes.carisma, modifier: character.attributes.carismaTempMod || 0 }
+        { name: 'For', dbField: 'forca', value: characterAttributes.forca, modifier: characterAttributes.forcaTempMod || 0 },
+        { name: 'Des', dbField: 'destreza', value: characterAttributes.destreza, modifier: characterAttributes.destrezaTempMod || 0 },
+        { name: 'Con', dbField: 'constituicao', value: characterAttributes.constituicao, modifier: characterAttributes.constituicaoTempMod || 0 },
+        { name: 'Int', dbField: 'inteligencia', value: characterAttributes.inteligencia, modifier: characterAttributes.inteligenciaTempMod || 0 },
+        { name: 'Sab', dbField: 'sabedoria', value: characterAttributes.sabedoria, modifier: characterAttributes.sabedoriaTempMod || 0 },
+        { name: 'Car', dbField: 'carisma', value: characterAttributes.carisma, modifier: characterAttributes.carismaTempMod || 0 }
       ]);
     }
-  }, [character?.attributes]);
+  }, [characterAttributes]);
 
   // Helper function to convert attribute name to short form
   const getAttributeShortName = (attributeName: string): string => {
@@ -75,17 +77,17 @@ const Attributes = () => {
 
   // Helper function to get full attribute value (base + temp mod)
   const getFullAttributeValue = (attributeName: string): number => {
-    if (!character?.attributes) return 10;
-    
+    if (!characterAttributes) return 10;
+
     const attrMap: { [key: string]: number } = {
-      'Força': character.attributes.forca + (character.attributes.forcaTempMod || 0),
-      'Destreza': character.attributes.destreza + (character.attributes.destrezaTempMod || 0),
-      'Constituição': character.attributes.constituicao + (character.attributes.constituicaoTempMod || 0),
-      'Inteligência': character.attributes.inteligencia + (character.attributes.inteligenciaTempMod || 0),
-      'Sabedoria': character.attributes.sabedoria + (character.attributes.sabedoriaTempMod || 0),
-      'Carisma': character.attributes.carisma + (character.attributes.carismaTempMod || 0)
+      'Força': characterAttributes.forca + (characterAttributes.forcaTempMod || 0),
+      'Destreza': characterAttributes.destreza + (characterAttributes.destrezaTempMod || 0),
+      'Constituição': characterAttributes.constituicao + (characterAttributes.constituicaoTempMod || 0),
+      'Inteligência': characterAttributes.inteligencia + (characterAttributes.inteligenciaTempMod || 0),
+      'Sabedoria': characterAttributes.sabedoria + (characterAttributes.sabedoriaTempMod || 0),
+      'Carisma': characterAttributes.carisma + (characterAttributes.carismaTempMod || 0)
     };
-    
+
     return attrMap[attributeName] || 10;
   };
 
@@ -96,10 +98,10 @@ const Attributes = () => {
     }
   }, [character?.id]);
 
-  // Load skills from character context
+  // Load skills from attributes context
   useEffect(() => {
-    if (character?.skills && character?.attributes) {
-      const transformedSkills = character.skills.map(skill => {
+    if (characterSkills && characterAttributes) {
+      const transformedSkills = characterSkills.map(skill => {
         const attributeValue = getFullAttributeValue(skill.attribute);
         const attributeBonus = getAttributeBonus(attributeValue);
         const total = attributeBonus + skill.halfLevel + (skill.isTrained ? skill.trainedBonus : 0) + skill.others;
@@ -118,10 +120,10 @@ const Attributes = () => {
           others: skill.others,
         };
       });
-      
+
       setSkills(transformedSkills);
     }
-  }, [character?.skills, character?.attributes]);
+  }, [characterSkills, characterAttributes]);
 
   const updateAttributeValue = async (attrName: string, newValue: number) => {
     const attr = attributes.find(a => a.name === attrName);
@@ -147,14 +149,14 @@ const Attributes = () => {
     } catch (err) {
       console.error('Erro ao atualizar atributo:', err);
       // Revert local state on error
-      if (character?.attributes) {
+      if (characterAttributes) {
         setAttributes([
-          { name: 'For', dbField: 'forca', value: character.attributes.forca, modifier: 0 },
-          { name: 'Des', dbField: 'destreza', value: character.attributes.destreza, modifier: 0 },
-          { name: 'Con', dbField: 'constituicao', value: character.attributes.constituicao, modifier: 0 },
-          { name: 'Int', dbField: 'inteligencia', value: character.attributes.inteligencia, modifier: 0 },
-          { name: 'Sab', dbField: 'sabedoria', value: character.attributes.sabedoria, modifier: 0 },
-          { name: 'Car', dbField: 'carisma', value: character.attributes.carisma, modifier: 0 }
+          { name: 'For', dbField: 'forca', value: characterAttributes.forca, modifier: 0 },
+          { name: 'Des', dbField: 'destreza', value: characterAttributes.destreza, modifier: 0 },
+          { name: 'Con', dbField: 'constituicao', value: characterAttributes.constituicao, modifier: 0 },
+          { name: 'Int', dbField: 'inteligencia', value: characterAttributes.inteligencia, modifier: 0 },
+          { name: 'Sab', dbField: 'sabedoria', value: characterAttributes.sabedoria, modifier: 0 },
+          { name: 'Car', dbField: 'carisma', value: characterAttributes.carisma, modifier: 0 }
         ]);
       }
     }
@@ -197,14 +199,14 @@ const Attributes = () => {
     } catch (err) {
       console.error('Erro ao atualizar modificador temporário:', err);
       // Revert local state on error
-      if (character?.attributes) {
+      if (characterAttributes) {
         setAttributes([
-          { name: 'For', dbField: 'forca', value: character.attributes.forca, modifier: character.attributes.forcaTempMod || 0 },
-          { name: 'Des', dbField: 'destreza', value: character.attributes.destreza, modifier: character.attributes.destrezaTempMod || 0 },
-          { name: 'Con', dbField: 'constituicao', value: character.attributes.constituicao, modifier: character.attributes.constituicaoTempMod || 0 },
-          { name: 'Int', dbField: 'inteligencia', value: character.attributes.inteligencia, modifier: character.attributes.inteligenciaTempMod || 0 },
-          { name: 'Sab', dbField: 'sabedoria', value: character.attributes.sabedoria, modifier: character.attributes.sabedoriaTempMod || 0 },
-          { name: 'Car', dbField: 'carisma', value: character.attributes.carisma, modifier: character.attributes.carismaTempMod || 0 }
+          { name: 'For', dbField: 'forca', value: characterAttributes.forca, modifier: characterAttributes.forcaTempMod || 0 },
+          { name: 'Des', dbField: 'destreza', value: characterAttributes.destreza, modifier: characterAttributes.destrezaTempMod || 0 },
+          { name: 'Con', dbField: 'constituicao', value: characterAttributes.constituicao, modifier: characterAttributes.constituicaoTempMod || 0 },
+          { name: 'Int', dbField: 'inteligencia', value: characterAttributes.inteligencia, modifier: characterAttributes.inteligenciaTempMod || 0 },
+          { name: 'Sab', dbField: 'sabedoria', value: characterAttributes.sabedoria, modifier: characterAttributes.sabedoriaTempMod || 0 },
+          { name: 'Car', dbField: 'carisma', value: characterAttributes.carisma, modifier: characterAttributes.carismaTempMod || 0 }
         ]);
       }
     }

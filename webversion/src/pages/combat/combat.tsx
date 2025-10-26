@@ -13,6 +13,7 @@ import type { AttackFormData } from '../../components/modal/forms/AttackForm';
 import type { SpellFormData } from '../../components/modal/forms/SpellForm';
 import type { AbilityFormData } from '../../components/modal/forms/AbilityForm';
 import { useCharacter } from '../../contexts/CharacterContext';
+import { useCombat } from '../../contexts/CombatContext';
 import './combat.css';
 
 type TabType = 'attacks' | 'spells';
@@ -53,13 +54,20 @@ interface Spell {
 
 
 const Combat = () => {
-  const { 
-    character, 
-    updateHealth, 
+  const {
+    character,
+    updateHealth,
     updateMana,
     updateDefenseArmorBonus,
     updateDefenseAttributeBonus,
     updateDefenseOther,
+  } = useCharacter();
+
+  const {
+    attacks,
+    spells,
+    abilities,
+    powers,
     addAttack,
     updateAttack,
     deleteAttack,
@@ -75,7 +83,7 @@ const Combat = () => {
     addPower,
     updatePower,
     deletePower
-  } = useCharacter();
+  } = useCombat();
   const [activeTab, setActiveTab] = useState<TabType>('attacks');
 
   // Menu states
@@ -130,16 +138,7 @@ const Combat = () => {
     }
   };
 
-  // Get attacks from character context
-  const attacks = character?.attacks || [];
-
-  // Get spells from character context
-  const spells = character?.spells || [];
-
-
-  // Get abilities and powers from character context
-  const abilities = character?.abilities || [];
-  const powers = character?.powers || [];
+  // Attacks, spells, abilities, and powers now come from useCombat() hook
 
   const [selectedAttack, setSelectedAttack] = useState<Attack | null>(null);
   const [selectedSpell, setSelectedSpell] = useState<Spell | null>(null);

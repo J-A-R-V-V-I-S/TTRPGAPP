@@ -2,6 +2,8 @@ import { useState } from 'react';
 import Modal from '../modal';
 import { skillsApi } from '../../../services/api';
 import { useCharacter } from '../../../contexts/CharacterContext';
+import { useAttributes } from '../../../contexts/AttributesContext';
+import type { AttributeName } from '../../../types/types';
 import './AddCraftModal.css';
 
 interface AddCraftModalProps {
@@ -10,19 +12,20 @@ interface AddCraftModalProps {
 }
 
 const AddCraftModal = ({ isOpen, onClose }: AddCraftModalProps) => {
-  const { character, refreshSkills } = useCharacter();
+  const { character } = useCharacter();
+  const { refreshSkills } = useAttributes();
   const [craftName, setCraftName] = useState('');
-  const [selectedAttribute, setSelectedAttribute] = useState('Inteligência');
+  const [selectedAttribute, setSelectedAttribute] = useState<AttributeName>('inteligência');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const attributes = [
-    { value: 'Força', label: 'Força' },
-    { value: 'Destreza', label: 'Destreza' },
-    { value: 'Constituição', label: 'Constituição' },
-    { value: 'Inteligência', label: 'Inteligência' },
-    { value: 'Sabedoria', label: 'Sabedoria' },
-    { value: 'Carisma', label: 'Carisma' }
+  const attributes: Array<{ value: AttributeName; label: string }> = [
+    { value: 'força', label: 'Força' },
+    { value: 'destreza', label: 'Destreza' },
+    { value: 'constituição', label: 'Constituição' },
+    { value: 'inteligência', label: 'Inteligência' },
+    { value: 'sabedoria', label: 'Sabedoria' },
+    { value: 'carisma', label: 'Carisma' }
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,8 +48,8 @@ const AddCraftModal = ({ isOpen, onClose }: AddCraftModalProps) => {
       // Calcular half_level baseado no nível do personagem
       const halfLevel = Math.floor((character.level || 1) / 2);
 
-      // Criar a skill/ofício
-      await skillsApi.createSkill({
+      // Criar a skill/ofício (usando formato do banco de dados - snake_case)
+      const skillData: any = {
         character_id: character.id,
         name: craftName.trim(),
         attribute: selectedAttribute,
@@ -56,14 +59,16 @@ const AddCraftModal = ({ isOpen, onClose }: AddCraftModalProps) => {
         half_level: halfLevel,
         trained_bonus: 0,
         others: 0,
-      });
+      };
+
+      await skillsApi.createSkill(skillData);
 
       // Atualizar a lista de skills
       await refreshSkills();
 
       // Limpar formulário e fechar modal
       setCraftName('');
-      setSelectedAttribute('Inteligência');
+      setSelectedAttribute('inteligência');
       onClose();
     } catch (err) {
       console.error('Erro ao criar ofício:', err);
@@ -76,7 +81,7 @@ const AddCraftModal = ({ isOpen, onClose }: AddCraftModalProps) => {
   const handleClose = () => {
     if (!isLoading) {
       setCraftName('');
-      setSelectedAttribute('Inteligência');
+      setSelectedAttribute('inteligência');
       setError(null);
       onClose();
     }
@@ -113,7 +118,7 @@ const AddCraftModal = ({ isOpen, onClose }: AddCraftModalProps) => {
           <select
             id="attribute"
             value={selectedAttribute}
-            onChange={(e) => setSelectedAttribute(e.target.value)}
+            onChange={(e) => setSelectedAttribute(e.target.value as AttributeName)}
             className="form-select"
             disabled={isLoading}
           >
