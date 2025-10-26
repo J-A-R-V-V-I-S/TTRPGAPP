@@ -9,8 +9,7 @@ interface GroupCurrencyProps {
   onUpdateCurrency?: (gold: number, silver: number, bronze: number) => Promise<void>;
 }
 
-const GroupCurrency = ({ 
-  groupId,
+const GroupCurrency = ({
   gold = 0,
   silver = 0,
   bronze = 0,
@@ -26,17 +25,6 @@ const GroupCurrency = ({
   const [transactionSilver, setTransactionSilver] = useState(0);
   const [transactionBronze, setTransactionBronze] = useState(0);
   const [transactionDescription, setTransactionDescription] = useState('');
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR', { 
-      day: '2-digit', 
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
 
   const handleSubmitTransaction = async () => {
     if (!onUpdateCurrency) return;
