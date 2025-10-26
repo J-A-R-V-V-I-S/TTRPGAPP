@@ -22,7 +22,6 @@ const HealthBar = ({
   const [tempEditValue, setTempEditValue] = useState(tempHp.toString());
 
   const healthPercentage = currentHp < 0 ? 0 : Math.min((currentHp / maxHp) * 100, 100);
-  const totalHp = currentHp + tempHp;
 
   const getHealthBarColor = () => {
     if (currentHp < 0) return '#4a5568'; // Dark gray for unconscious/fallen character
