@@ -14,11 +14,9 @@ import {
   GROUP_CONFIG,
 } from '../../utils/groupHelpers';
 import {
-  createGroupService,
-  joinGroupService,
   loadGroupStorageItems,
 } from '../../services/groupService';
-import { validateItemId, validateGroupId } from '../../utils/errorHandler';
+import { validateItemId } from '../../utils/errorHandler';
 import './group.css';
 
 
