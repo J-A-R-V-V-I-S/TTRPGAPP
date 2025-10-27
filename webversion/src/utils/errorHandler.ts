@@ -39,6 +39,42 @@ export const validateCharacterId = (characterId: string | undefined | null, cont
 };
 
 /**
+ * Validate item ID exists
+ * Throws error with context if validation fails
+ */
+export const validateItemId = (itemId: string | undefined | null, context: string): void => {
+  if (!itemId) {
+    const errorMessage = `ID do item inválido (${context})`;
+    console.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+};
+
+/**
+ * Validate group ID exists
+ * Throws error with context if validation fails
+ */
+export const validateGroupId = (groupId: string | undefined | null, context: string): void => {
+  if (!groupId) {
+    const errorMessage = `ID do grupo inválido (${context})`;
+    console.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+};
+
+/**
+ * Validate required string parameter
+ * Throws error with context if validation fails
+ */
+export const validateRequired = (value: string | undefined | null, paramName: string, context: string): void => {
+  if (!value || value.trim() === '') {
+    const errorMessage = `Parâmetro obrigatório ausente: ${paramName} (${context})`;
+    console.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+};
+
+/**
  * Handle database operation with standardized error logging
  * Returns null on error instead of throwing
  */

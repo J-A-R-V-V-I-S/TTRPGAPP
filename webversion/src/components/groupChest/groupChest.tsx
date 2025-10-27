@@ -43,9 +43,9 @@ interface GroupChestProps {
   onUpdateItemQuantity?: (itemId: string, newQuantity: number) => void;
 }
 
-const GroupChest = ({ 
-  arrows = 0, 
-  bullets = 0, 
+const GroupChest = ({
+  arrows: _arrows = 0,
+  bullets: _bullets = 0,
   items = [],
   onAddItem,
   onEditItem,
@@ -53,37 +53,13 @@ const GroupChest = ({
   onMoveToInventory,
   onSellItem,
   onConsumeItem,
-  onArrowsChange,
-  onBulletsChange,
+  onArrowsChange: _onArrowsChange,
+  onBulletsChange: _onBulletsChange,
   onUpdateItemQuantity
 }: GroupChestProps) => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<ChestItem | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-
-  const handleArrowsIncrement = () => {
-    if (onArrowsChange) {
-      onArrowsChange(arrows + 1);
-    }
-  };
-
-  const handleArrowsDecrement = () => {
-    if (onArrowsChange && arrows > 0) {
-      onArrowsChange(arrows - 1);
-    }
-  };
-
-  const handleBulletsIncrement = () => {
-    if (onBulletsChange) {
-      onBulletsChange(bullets + 1);
-    }
-  };
-
-  const handleBulletsDecrement = () => {
-    if (onBulletsChange && bullets > 0) {
-      onBulletsChange(bullets - 1);
-    }
-  };
 
   const isConsumable = (item: ChestItem) => {
     return item.category?.toLowerCase() === 'consumable' ||

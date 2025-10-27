@@ -6,6 +6,7 @@ import type { Ability, Power } from '../types/ability';
 import { supabase } from '../config/supabase';
 import { useUser } from './UserContext';
 import { validateCharacterId, executeWithLogging, logError } from '../utils/errorHandler';
+import { createSimpleTableLoader, createJunctionTableLoader } from '../utils/tableLoaders';
 
 interface CombatContextType {
   attacks: Attack[];
@@ -68,25 +69,11 @@ export const CombatProvider = ({ children }: CombatProviderProps) => {
 
   // ========== ATTACKS ==========
 
-  const loadAttacks = useCallback(async (characterId: string): Promise<Attack[]> => {
-    try {
-      const { data, error } = await supabase
-        .from('attacks')
-        .select('*')
-        .eq('character_id', characterId)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        logError('carregar ataques', error);
-        return [];
-      }
-
-      return data || [];
-    } catch (err) {
-      logError('carregar ataques', err);
-      return [];
-    }
-  }, []);
+  // Using factory pattern to eliminate repetitive loader code
+  const loadAttacks = useCallback(
+    createSimpleTableLoader<Attack>('attacks', 'carregar ataques'),
+    []
+  );
 
   const refreshAttacks = useCallback(async () => {
     if (selectedCharacterId) {
@@ -456,41 +443,16 @@ export const CombatProvider = ({ children }: CombatProviderProps) => {
 
   // ========== ABILITIES ==========
 
-  const loadAbilities = useCallback(async (characterId: string): Promise<Ability[]> => {
-    try {
-      const { data: characterAbilities, error: characterAbilitiesError } = await supabase
-        .from('character_abilities')
-        .select('ability_id')
-        .eq('character_id', characterId);
-
-      if (characterAbilitiesError) {
-        logError('carregar character_abilities', characterAbilitiesError);
-        return [];
-      }
-
-      if (!characterAbilities || characterAbilities.length === 0) {
-        return [];
-      }
-
-      const abilityIds = characterAbilities.map(ca => ca.ability_id);
-
-      const { data: abilitiesData, error: abilitiesError } = await supabase
-        .from('abilities')
-        .select('*')
-        .in('id', abilityIds)
-        .eq('type', 'ability');
-
-      if (abilitiesError) {
-        logError('carregar habilidades', abilitiesError);
-        return [];
-      }
-
-      return abilitiesData || [];
-    } catch (err) {
-      logError('carregar habilidades', err);
-      return [];
-    }
-  }, []);
+  const loadAbilities = useCallback(
+    createJunctionTableLoader<Ability>(
+      'character_abilities',
+      'ability_id',
+      'abilities',
+      { field: 'type', value: 'ability' },
+      'carregar habilidades'
+    ),
+    []
+  );
 
   const refreshAbilities = useCallback(async () => {
     if (selectedCharacterId) {
@@ -599,41 +561,16 @@ export const CombatProvider = ({ children }: CombatProviderProps) => {
 
   // ========== POWERS ==========
 
-  const loadPowers = useCallback(async (characterId: string): Promise<Power[]> => {
-    try {
-      const { data: characterAbilities, error: characterAbilitiesError } = await supabase
-        .from('character_abilities')
-        .select('ability_id')
-        .eq('character_id', characterId);
-
-      if (characterAbilitiesError) {
-        logError('carregar character_abilities', characterAbilitiesError);
-        return [];
-      }
-
-      if (!characterAbilities || characterAbilities.length === 0) {
-        return [];
-      }
-
-      const abilityIds = characterAbilities.map(ca => ca.ability_id);
-
-      const { data: powersData, error: powersError } = await supabase
-        .from('abilities')
-        .select('*')
-        .in('id', abilityIds)
-        .eq('type', 'power');
-
-      if (powersError) {
-        logError('carregar poderes', powersError);
-        return [];
-      }
-
-      return powersData || [];
-    } catch (err) {
-      logError('carregar poderes', err);
-      return [];
-    }
-  }, []);
+  const loadPowers = useCallback(
+    createJunctionTableLoader<Power>(
+      'character_abilities',
+      'ability_id',
+      'abilities',
+      { field: 'type', value: 'power' },
+      'carregar poderes'
+    ),
+    []
+  );
 
   const refreshPowers = useCallback(async () => {
     if (selectedCharacterId) {

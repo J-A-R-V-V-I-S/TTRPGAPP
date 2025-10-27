@@ -1,10 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Navbar from '../../components/navbar/navbar';
 import HealthBar from '../../components/healthBar/healthBar';
 import ManaBar from '../../components/manaBar/manaBar';
 import DefenseBar from '../../components/defenseBar/defenseBar';
-import TabbedItemList from '../../components/tabbedItemList/tabbedItemList';
-import type { TabData } from '../../components/tabbedItemList/tabbedItemList';
 import Modal from '../../components/modal/modal';
 import AttackForm from '../../components/modal/forms/AttackForm';
 import SpellForm from '../../components/modal/forms/SpellForm';
@@ -14,6 +12,12 @@ import type { SpellFormData } from '../../components/modal/forms/SpellForm';
 import type { AbilityFormData } from '../../components/modal/forms/AbilityForm';
 import { useCharacter } from '../../contexts/CharacterContext';
 import { useCombat } from '../../contexts/CombatContext';
+import AttacksList from '../../components/AttacksList/AttacksList';
+import SpellsList from '../../components/SpellsList/SpellsList';
+import SpellDetails from '../../components/SpellDetails/SpellDetails';
+import AprimoramentoForm from '../../components/AprimoramentoForm/AprimoramentoForm';
+import SkillsSection from '../../components/SkillsSection/SkillsSection';
+import { generateSkillsTabData } from '../../utils/combatHelpers';
 import './combat.css';
 
 type TabType = 'attacks' | 'spells';
@@ -154,7 +158,19 @@ const Combat = () => {
   const [aprimoramentoApplications, setAprimoramentoApplications] = useState<Record<string, number>>({});
 
   const toggleSpellPrepared = (spellId: string) => {
-    // TODO: Implement spell preparation functionality
+    /**
+     * FUTURE ENHANCEMENT: Spell Preparation System
+     *
+     * D&D mechanic where spellcasters prepare a limited number of spells per day.
+     * Implementation requires:
+     * - Add 'prepared' boolean field to character_spells table
+     * - Add max_prepared_spells calculation based on class/level
+     * - UI toggle for marking spells as prepared
+     * - Validation to prevent over-preparation
+     *
+     * Complexity: Medium | Priority: Low
+     * Tracked in: Future backlog
+     */
     console.log('Toggle spell prepared:', spellId);
   };
 
@@ -241,19 +257,14 @@ const Combat = () => {
     }));
   };
 
-  const calculateTotalCost = (spellId: string, aprimoramento: Aprimoramento): number => {
-    const key = `${spellId}-${aprimoramento.id}`;
-    const applications = aprimoramentoApplications[key] || 0;
-    return aprimoramento.custoAdicionalPM * (aprimoramento.reaplicavel ? applications : 1);
-  };
 
-  const handleAddSkill = (tabKey: AbilityTabType) => {
+  const handleAddSkill = useCallback((tabKey: AbilityTabType) => {
     if (tabKey === 'abilities') {
       setAbilityModalOpen(true);
     } else {
       setPowerModalOpen(true);
     }
-  };
+  }, []);
 
   const handleAddCombatItem = (type: TabType) => {
     if (type === 'attacks') {
@@ -334,7 +345,7 @@ const Combat = () => {
   };
 
   // Handlers for abilities and powers
-  const handleDeleteSkill = async (skillId: string, tabKey: AbilityTabType) => {
+  const handleDeleteSkill = useCallback(async (skillId: string, tabKey: AbilityTabType) => {
     try {
       if (tabKey === 'abilities') {
         await deleteAbility(skillId);
@@ -345,17 +356,17 @@ const Combat = () => {
     } catch (error) {
       console.error('Erro ao deletar habilidade/poder:', error);
     }
-  };
+  }, [deleteAbility, deletePower]);
 
-  const handleEditSkill = (skill: any, tabKey: AbilityTabType) => {
+  const handleEditSkill = useCallback((skill: any, tabKey: AbilityTabType) => {
     if (tabKey === 'abilities') {
       handleEditAbility(skill);
     } else {
       handleEditPower(skill);
     }
-  };
+  }, [handleEditAbility, handleEditPower]);
 
-  const handleUpdateSkillDescription = async (skillId: string, tabKey: AbilityTabType, newDescription: string) => {
+  const handleUpdateSkillDescription = useCallback(async (skillId: string, tabKey: AbilityTabType, newDescription: string) => {
     try {
       if (tabKey === 'abilities') {
         await updateAbility(skillId, { description: newDescription });
@@ -365,65 +376,20 @@ const Combat = () => {
     } catch (error) {
       console.error('Erro ao atualizar descrição:', error);
     }
-  };
+  }, [updateAbility, updatePower]);
 
 
   // Tab data for abilities and powers section
-  const skillsTabData: TabData<AbilityTabType, any> = useMemo(() => ({
-    tabs: [
-      { key: 'abilities', label: 'Habilidades', icon: '⚡' },
-      { key: 'powers', label: 'Poderes', icon: '✨' }
-    ],
-    items: {
-      abilities,
-      powers
-    },
-    getItemFields: (skill) => {
-      const fields = [];
-      
-      if (skill.category || skill.type) {
-        fields.push({ label: 'Categoria', value: skill.category || skill.type });
-      }
-      
-      if (skill.cost) {
-        fields.push({ label: 'Custo/Uso', value: skill.cost });
-      }
-      
-      if (skill.prerequisites) {
-        fields.push({ label: 'Pré-requisitos', value: skill.prerequisites });
-      }
-      
-      if (skill.cooldown) {
-        fields.push({ label: 'Recarga', value: skill.cooldown });
-      }
-      
-      if (skill.effect) {
-        fields.push({ label: 'Efeito', value: skill.effect });
-      }
-      
-      return fields;
-    },
-    getActionButtons: (skill, tabKey) => [
-      {
-        label: '✏️ Editar',
-        onClick: () => handleEditSkill(skill, tabKey),
-        show: true
-      },
-      {
-        label: '🗑️ Deletar',
-        onClick: () => handleDeleteSkill(skill.id, tabKey),
-        className: 'delete',
-        show: true
-      }
-    ],
-    getNoSelectionMessage: (tabKey) => 
-      tabKey === 'abilities' 
-        ? 'Selecione uma habilidade para ver os detalhes'
-        : 'Selecione um poder para ver os detalhes',
-    onAddItem: handleAddSkill,
-    onUpdateDescription: handleUpdateSkillDescription,
-    showMenu: false // Remove the "..." menu for abilities and powers
-  }), [abilities, powers, handleEditSkill, handleDeleteSkill, handleAddSkill, handleUpdateSkillDescription]);
+  const skillsTabData = useMemo(
+    () =>
+      generateSkillsTabData(abilities, powers, {
+        handleEditSkill,
+        handleDeleteSkill,
+        handleAddSkill,
+        handleUpdateSkillDescription,
+      }),
+    [abilities, powers, handleEditSkill, handleDeleteSkill, handleAddSkill, handleUpdateSkillDescription]
+  );
 
   return (
     <div className="with-navbar">
@@ -453,15 +419,15 @@ const Combat = () => {
                   <p>Carregando dados do personagem...</p>
                 </div>
               )}
-              <DefenseBar 
+              <DefenseBar
                 dexterityBonus={character?.defence_attribute_bonus || 0}
                 armorBonus={character?.defence_armor_bonus || 0}
-                shieldBonus={0} // TODO: Implement shield bonus from equipment
+                shieldBonus={0} /* FUTURE: Calculate from equipped items with type='shield' in inventory */
                 otherBonus={character?.defence_other || 0}
                 baseDefense={character?.defence_base || 10}
                 onDexterityChange={updateDefenseAttributeBonus}
                 onArmorChange={updateDefenseArmorBonus}
-                onShieldChange={() => {}} // TODO: Implement shield bonus update
+                onShieldChange={() => {}} /* FUTURE: Add updateDefenseShieldBonus handler when shield system is implemented */
                 onOtherChange={updateDefenseOther}
               />
             </div>
@@ -510,144 +476,41 @@ const Combat = () => {
           <div className="combat-layout">
             {/* ATTACKS TAB */}
             {activeTab === 'attacks' && (
-              <>
-                <div className="combat-list">
-                  <div className="list-header">
-                    <h2>Ataques Disponíveis</h2>
-                  </div>
-                  {attacks.map(attack => (
-                    <div 
-                      key={attack.id} 
-                      className={`combat-item ${selectedAttack?.id === attack.id ? 'selected' : ''}`}
-                      onClick={() => setSelectedAttack(attack)}
-                    >
-                      <div className="combat-item-header">
-                        <div className="combat-name-level">
-                          <span className="combat-name">{attack.name}</span>
-                          <span className="combat-level">{attack.type}</span>
-                        </div>
-                        <div className="combat-item-actions">
-                          <span className="attack-bonus">{attack.testeAtaque}</span>
-                          <div className="item-menu-container">
-                            <button 
-                              className="item-menu-btn"
-                              onClick={(e) => toggleMenu(`attack-${attack.id}`, e)}
-                            >
-                              ⋮
-                            </button>
-                            {openMenuId === `attack-${attack.id}` && (
-                              <div className="item-menu-dropdown">
-                                <button 
-                                  className="menu-option"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleEditAttack(attack);
-                                  }}
-                                >
-                                  ✏️ Editar
-                                </button>
-                                <button 
-                                  className="menu-option delete"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDeleteAttack(attack.id);
-                                  }}
-                                >
-                                  🗑️ Deletar
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="combat-school">{attack.damage}</div>
-                    </div>
-                  ))}
-                  <div 
-                    className="combat-item add-item-btn"
-                    onClick={() => handleAddCombatItem('attacks')}
-                  >
-                    <div className="add-item-content">
-                      <span className="add-item-icon">+</span>
-                      <span className="add-item-text">Adicionar Ataque</span>
-                    </div>
-                  </div>
+              <div className="combat-list">
+                <div className="list-header">
+                  <h2>Ataques Disponíveis</h2>
                 </div>
-              </>
+                <AttacksList
+                  attacks={attacks}
+                  selectedAttack={selectedAttack}
+                  onSelectAttack={setSelectedAttack}
+                  onEditAttack={handleEditAttack}
+                  onDeleteAttack={handleDeleteAttack}
+                  onAddAttack={() => handleAddCombatItem('attacks')}
+                  openMenuId={openMenuId}
+                  onToggleMenu={toggleMenu}
+                />
+              </div>
             )}
 
             {/* SPELLS TAB */}
             {activeTab === 'spells' && (
-              <>
-                <div className="combat-list">
-                  <div className="list-header">
-                    <h2>Grimório</h2>
-                  </div>
-                  {spells.map(spell => (
-                    <div 
-                      key={spell.id} 
-                      className={`combat-item ${selectedSpell?.id === spell.id ? 'selected' : ''}`}
-                      onClick={() => setSelectedSpell(spell)}
-                    >
-                      <div className="combat-item-header">
-                        <div className="combat-name-level">
-                          <span className="combat-name">{spell.name}</span>
-                          <span className="combat-level">{spell.escola}</span>
-                        </div>
-                        <div className="combat-item-actions">
-                          <input 
-                            type="checkbox" 
-                            checked={false}
-                            onChange={() => toggleSpellPrepared(spell.id)}
-                            onClick={(e) => e.stopPropagation()}
-                            title="Preparada"
-                          />
-                          <div className="item-menu-container">
-                            <button 
-                              className="item-menu-btn"
-                              onClick={(e) => toggleMenu(`spell-${spell.id}`, e)}
-                            >
-                              ⋮
-                            </button>
-                            {openMenuId === `spell-${spell.id}` && (
-                              <div className="item-menu-dropdown">
-                                <button 
-                                  className="menu-option"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleEditSpell(spell);
-                                  }}
-                                >
-                                  ✏️ Editar
-                                </button>
-                                <button 
-                                  className="menu-option delete"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDeleteSpell(spell.id);
-                                  }}
-                                >
-                                  🗑️ Deletar
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="combat-school">{spell.execucao}</div>
-                    </div>
-                  ))}
-                  <div 
-                    className="combat-item add-item-btn"
-                    onClick={() => handleAddCombatItem('spells')}
-                  >
-                    <div className="add-item-content">
-                      <span className="add-item-icon">+</span>
-                      <span className="add-item-text">Adicionar Magia</span>
-                    </div>
-                  </div>
+              <div className="combat-list">
+                <div className="list-header">
+                  <h2>Grimório</h2>
                 </div>
-              </>
+                <SpellsList
+                  spells={spells}
+                  selectedSpell={selectedSpell}
+                  onSelectSpell={setSelectedSpell}
+                  onEditSpell={handleEditSpell}
+                  onDeleteSpell={handleDeleteSpell}
+                  onAddSpell={() => handleAddCombatItem('spells')}
+                  onToggleSpellPrepared={toggleSpellPrepared}
+                  openMenuId={openMenuId}
+                  onToggleMenu={toggleMenu}
+                />
+              </div>
             )}
 
 
@@ -739,304 +602,27 @@ const Combat = () => {
               {/* Spell Details */}
               {activeTab === 'spells' && selectedSpell && (
                 <>
-                  <div className="details-header">
-                    <div className="editable-title">
-                      <input 
-                        type="text" 
-                        value={selectedSpell.name}
-                        onChange={(e) => handleUpdateSpellField(selectedSpell.id, 'name', e.target.value)}
-                        className="spell-name-input"
-                        placeholder="Nome da magia"
-                      />
-                    </div>
-                    <span className="details-level">{selectedSpell.escola}</span>
-                  </div>
-                  
-                  <div className="details-stats">
-                    <div className="stat-row">
-                      <strong>Escola:</strong>
-                      <div className="editable-stat">
-                        <input 
-                          type="text" 
-                          value={selectedSpell.escola}
-                          onChange={(e) => handleUpdateSpellField(selectedSpell.id, 'escola', e.target.value)}
-                          className="escola-input"
-                          placeholder="Ex: Evocação"
-                        />
-                      </div>
-                    </div>
-                    <div className="stat-row">
-                      <strong>Execução:</strong>
-                      <div className="editable-stat">
-                        <input 
-                          type="text" 
-                          value={selectedSpell.execucao}
-                          onChange={(e) => handleUpdateSpellField(selectedSpell.id, 'execucao', e.target.value)}
-                          className="execucao-input"
-                          placeholder="Ex: 1 ação"
-                        />
-                      </div>
-                    </div>
-                    <div className="stat-row">
-                      <strong>Alcance:</strong>
-                      <div className="editable-stat">
-                        <input 
-                          type="text" 
-                          value={selectedSpell.alcance}
-                          onChange={(e) => handleUpdateSpellField(selectedSpell.id, 'alcance', e.target.value)}
-                          className="alcance-input"
-                          placeholder="Ex: 36 metros"
-                        />
-                      </div>
-                    </div>
-                    <div className="stat-row">
-                      <strong>Área:</strong>
-                      <div className="editable-stat">
-                        <input 
-                          type="text" 
-                          value={selectedSpell.area}
-                          onChange={(e) => handleUpdateSpellField(selectedSpell.id, 'area', e.target.value)}
-                          className="area-input"
-                          placeholder="Ex: Esfera de 6m"
-                        />
-                      </div>
-                    </div>
-                    <div className="stat-row">
-                      <strong>Duração:</strong>
-                      <div className="editable-stat">
-                        <input 
-                          type="text" 
-                          value={selectedSpell.duracao}
-                          onChange={(e) => handleUpdateSpellField(selectedSpell.id, 'duracao', e.target.value)}
-                          className="duracao-input"
-                          placeholder="Ex: Instantâneo"
-                        />
-                      </div>
-                    </div>
-                    <div className="stat-row">
-                      <strong>Resistência:</strong>
-                      <div className="editable-stat">
-                        <input 
-                          type="text" 
-                          value={selectedSpell.resistencia}
-                          onChange={(e) => handleUpdateSpellField(selectedSpell.id, 'resistencia', e.target.value)}
-                          className="resistencia-input"
-                          placeholder="Ex: Destreza (meio dano)"
-                        />
-                      </div>
-                    </div>
-                  </div>
+                  <SpellDetails
+                    spell={selectedSpell}
+                    aprimoramentoApplications={aprimoramentoApplications}
+                    onUpdateField={handleUpdateSpellField}
+                    onUpdateAprimoramento={handleUpdateAprimoramento}
+                    onIncrementAplicacoes={handleIncrementAplicacoes}
+                    onDecrementAplicacoes={handleDecrementAplicacoes}
+                    onRemoveAprimoramento={handleRemoveAprimoramento}
+                    onAddAprimoramento={handleAddAprimoramento}
+                    openMenuId={openMenuId}
+                    onToggleMenu={toggleMenu}
+                    onCloseMenu={() => setOpenMenuId(null)}
+                  />
 
-                  <div className="details-description">
-                    <h3>Efeito</h3>
-                    <div className="editable-stat">
-                      <textarea 
-                        value={selectedSpell.efeito}
-                        onChange={(e) => handleUpdateSpellField(selectedSpell.id, 'efeito', e.target.value)}
-                        className="efeito-textarea"
-                        placeholder="Descrição do efeito da magia..."
-                        rows={4}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Seção de Aprimoramentos */}
-                  <div className="aprimoramentos-section">
-                    <div className="aprimoramentos-header">
-                      <h3>Aprimoramentos</h3>
-                    </div>
-                    
-                    {selectedSpell.aprimoramentos.length > 0 ? (
-                      <div className="aprimoramentos-list">
-                        {selectedSpell.aprimoramentos.map((aprimoramento) => (
-                          <div key={aprimoramento.id} className="aprimoramento-item">
-                            <div className="aprimoramento-header">
-                              <div className="aprimoramento-info">
-                                <div className="aprimoramento-cost-info">
-                                  <div className="custo-base-section">
-                                    <span className="custo-base-label">Custo Base:</span>
-                                    <span className="custo-base-value">{aprimoramento.custoAdicionalPM || 0} PM</span>
-                                  </div>
-                                  {aprimoramento.reaplicavel && (
-                                    <div className="custo-total-section">
-                                      <span className="custo-total-label">Total:</span>
-                                      <span className="custo-total-value">{calculateTotalCost(selectedSpell.id, aprimoramento)} PM</span>
-                                    </div>
-                                  )}
-                                  {aprimoramento.reaplicavel && (
-                                    <span className="reaplicavel-badge">Reaplicável</span>
-                                  )}
-                                </div>
-                                
-                                {aprimoramento.reaplicavel && (
-                                  <div className="aplicacoes-counter">
-                                    <span className="aplicacoes-label">Aplicações:</span>
-                                    <div className="counter-controls">
-                                      <button 
-                                        className="counter-btn counter-minus"
-                                        onClick={() => handleDecrementAplicacoes(selectedSpell.id, aprimoramento.id)}
-                                        disabled={(aprimoramentoApplications[`${selectedSpell.id}-${aprimoramento.id}`] || 0) <= 0}
-                                      >
-                                        −
-                                      </button>
-                                      <span className="counter-value">{aprimoramentoApplications[`${selectedSpell.id}-${aprimoramento.id}`] || 0}</span>
-                                      <button 
-                                        className="counter-btn counter-plus"
-                                        onClick={() => handleIncrementAplicacoes(selectedSpell.id, aprimoramento.id)}
-                                      >
-                                        +
-                                      </button>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                              
-                              <div className="item-menu-container">
-                                <button 
-                                  className="item-menu-btn"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleMenu(`aprimoramento-${aprimoramento.id}`, e);
-                                  }}
-                                >
-                                  ⋮
-                                </button>
-                                {openMenuId === `aprimoramento-${aprimoramento.id}` && (
-                                  <div className="item-menu-dropdown">
-                                    <button 
-                                      className="menu-option"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setOpenMenuId(null);
-                                        // Edit mode is already enabled in spell details
-                                      }}
-                                    >
-                                      ✏️ Editar
-                                    </button>
-                                    <button 
-                                      className="menu-option delete"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleRemoveAprimoramento(selectedSpell.id, aprimoramento.id);
-                                        setOpenMenuId(null);
-                                      }}
-                                    >
-                                      🗑️ Deletar
-                                    </button>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                            
-                            <div className="aprimoramento-description">
-                              <label>Descrição:</label>
-                              <textarea 
-                                value={aprimoramento.descricao}
-                                onChange={(e) => handleUpdateAprimoramento(
-                                  selectedSpell.id, 
-                                  aprimoramento.id, 
-                                  'descricao', 
-                                  e.target.value
-                                )}
-                                className="aprimoramento-textarea"
-                                placeholder="Descrição do aprimoramento..."
-                                rows={2}
-                              />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="no-aprimoramentos">
-                        <p>Nenhum aprimoramento adicionado ainda.</p>
-                      </div>
-                    )}
-                    
-                    <button 
-                      className="btn-add-aprimoramento"
-                      onClick={() => handleAddAprimoramento(selectedSpell.id)}
-                    >
-                      + Adicionar Aprimoramento
-                    </button>
-                  </div>
-
-                  {/* Modal para Criar Aprimoramento */}
-                  {showAprimoramentoForm && (
-                    <div className="aprimoramento-modal-overlay">
-                      <div className="aprimoramento-modal">
-                        <div className="modal-header">
-                          <h3>Novo Aprimoramento</h3>
-                          <button 
-                            className="modal-close-btn"
-                            onClick={handleCancelAprimoramento}
-                          >
-                            ×
-                          </button>
-                        </div>
-                        
-                        <div className="modal-content">
-                          <div className="modal-field">
-                            <label>Custo Base (PM):</label>
-                            <input 
-                              type="number" 
-                              value={newAprimoramentoData.custoAdicionalPM}
-                              onChange={(e) => setNewAprimoramentoData(prev => ({
-                                ...prev,
-                                custoAdicionalPM: parseInt(e.target.value) || 1
-                              }))}
-                              className="modal-input"
-                              min="1"
-                            />
-                          </div>
-                          
-                          <div className="modal-field">
-                            <label className="modal-checkbox-label">
-                              <input 
-                                type="checkbox" 
-                                checked={newAprimoramentoData.reaplicavel}
-                                onChange={(e) => setNewAprimoramentoData(prev => ({
-                                  ...prev,
-                                  reaplicavel: e.target.checked
-                                }))}
-                                className="modal-checkbox"
-                              />
-                              Reaplicável (pode ser usado múltiplas vezes)
-                            </label>
-                          </div>
-                          
-                          <div className="modal-field">
-                            <label>Descrição:</label>
-                            <textarea 
-                              value={newAprimoramentoData.descricao}
-                              onChange={(e) => setNewAprimoramentoData(prev => ({
-                                ...prev,
-                                descricao: e.target.value
-                              }))}
-                              className="modal-textarea"
-                              placeholder="Descrição do aprimoramento..."
-                              rows={3}
-                            />
-                          </div>
-                        </div>
-                        
-                        <div className="modal-actions">
-                          <button 
-                            className="modal-btn modal-cancel"
-                            onClick={handleCancelAprimoramento}
-                          >
-                            Cancelar
-                          </button>
-                          <button 
-                            className="modal-btn modal-create"
-                            onClick={handleCreateAprimoramento}
-                          >
-                            Criar Aprimoramento
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
+                  <AprimoramentoForm
+                    isOpen={showAprimoramentoForm}
+                    newAprimoramentoData={newAprimoramentoData}
+                    onUpdateData={(data) => setNewAprimoramentoData(prev => ({ ...prev, ...data }))}
+                    onCancel={handleCancelAprimoramento}
+                    onCreate={handleCreateAprimoramento}
+                  />
                 </>
               )}
 
@@ -1066,26 +652,11 @@ const Combat = () => {
           </div>
 
           {/* Abilities and Powers Section */}
-          <TabbedItemList
-            key={`abilities-${abilities.length}-powers-${powers.length}-${tabbedListRefreshKey}`}
-            title="Habilidades e Poderes"
-            titleIcon={
-              <svg 
-                width="28" 
-                height="28" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-              </svg>
-            }
-            tabData={skillsTabData}
-            defaultTab="abilities"
-            colorScheme="orange"
+          <SkillsSection
+            abilities={abilities}
+            powers={powers}
+            skillsTabData={skillsTabData}
+            tabbedListRefreshKey={tabbedListRefreshKey}
           />
         </div>
 

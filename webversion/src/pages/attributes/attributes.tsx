@@ -2,16 +2,18 @@ import { useState, useEffect } from 'react';
 import Navbar from '../../components/navbar/navbar';
 import { useCharacter } from '../../contexts/CharacterContext';
 import { useAttributes } from '../../contexts/AttributesContext';
-import type { CharacterAttributes } from '../../types/character_attributes';
 import AddCraftModal from '../../components/modal/forms/AddCraftModal';
+import {
+  createAttributeState,
+  getAttributeColor,
+  getAttributeShortName,
+  getFullAttributeValue,
+  getAttributeByShortName,
+  type AttributeState
+} from '../../constants/attributes';
 import './attributes.css';
 
-interface Attribute {
-  name: string;
-  dbField: 'forca' | 'destreza' | 'constituicao' | 'inteligencia' | 'sabedoria' | 'carisma';
-  value: number;
-  modifier: number;
-}
+// Using AttributeState from constants/attributes.ts
 
 interface Skill {
   id: string;
@@ -34,61 +36,18 @@ const Attributes = () => {
   const { attributes: characterAttributes, skills: characterSkills, updateAttributes, updateSkill, refreshSkills } = useAttributes();
   const [skillSearch, setSkillSearch] = useState('');
   const [showAddCraftModal, setShowAddCraftModal] = useState(false);
-  const [attributes, setAttributes] = useState<Attribute[]>([
-    { name: 'For', dbField: 'forca', value: 10, modifier: 0 },
-    { name: 'Des', dbField: 'destreza', value: 10, modifier: 0 },
-    { name: 'Con', dbField: 'constituicao', value: 10, modifier: 0 },
-    { name: 'Int', dbField: 'inteligencia', value: 10, modifier: 0 },
-    { name: 'Sab', dbField: 'sabedoria', value: 10, modifier: 0 },
-    { name: 'Car', dbField: 'carisma', value: 10, modifier: 0 }
-  ]);
+  const [attributes, setAttributes] = useState<AttributeState[]>(createAttributeState());
 
   // Load attributes from attributes context
   useEffect(() => {
     if (characterAttributes) {
-      setAttributes([
-        { name: 'For', dbField: 'forca', value: characterAttributes.forca, modifier: characterAttributes.forcaTempMod || 0 },
-        { name: 'Des', dbField: 'destreza', value: characterAttributes.destreza, modifier: characterAttributes.destrezaTempMod || 0 },
-        { name: 'Con', dbField: 'constituicao', value: characterAttributes.constituicao, modifier: characterAttributes.constituicaoTempMod || 0 },
-        { name: 'Int', dbField: 'inteligencia', value: characterAttributes.inteligencia, modifier: characterAttributes.inteligenciaTempMod || 0 },
-        { name: 'Sab', dbField: 'sabedoria', value: characterAttributes.sabedoria, modifier: characterAttributes.sabedoriaTempMod || 0 },
-        { name: 'Car', dbField: 'carisma', value: characterAttributes.carisma, modifier: characterAttributes.carismaTempMod || 0 }
-      ]);
+      setAttributes(createAttributeState(characterAttributes));
     }
   }, [characterAttributes]);
-
-  // Helper function to convert attribute name to short form
-  const getAttributeShortName = (attributeName: string): string => {
-    const attrMap: { [key: string]: string } = {
-      'Força': 'For',
-      'Destreza': 'Des',
-      'Constituição': 'Con',
-      'Inteligência': 'Int',
-      'Sabedoria': 'Sab',
-      'Carisma': 'Car'
-    };
-    return attrMap[attributeName] || attributeName;
-  };
 
   // Helper function to get attribute bonus (direct value, no calculation needed)
   const getAttributeBonus = (attributeValue: number): number => {
     return attributeValue;
-  };
-
-  // Helper function to get full attribute value (base + temp mod)
-  const getFullAttributeValue = (attributeName: string): number => {
-    if (!characterAttributes) return 10;
-
-    const attrMap: { [key: string]: number } = {
-      'Força': characterAttributes.forca + (characterAttributes.forcaTempMod || 0),
-      'Destreza': characterAttributes.destreza + (characterAttributes.destrezaTempMod || 0),
-      'Constituição': characterAttributes.constituicao + (characterAttributes.constituicaoTempMod || 0),
-      'Inteligência': characterAttributes.inteligencia + (characterAttributes.inteligenciaTempMod || 0),
-      'Sabedoria': characterAttributes.sabedoria + (characterAttributes.sabedoriaTempMod || 0),
-      'Carisma': characterAttributes.carisma + (characterAttributes.carismaTempMod || 0)
-    };
-
-    return attrMap[attributeName] || 10;
   };
 
   // Load skills on mount
@@ -102,7 +61,7 @@ const Attributes = () => {
   useEffect(() => {
     if (characterSkills && characterAttributes) {
       const transformedSkills = characterSkills.map(skill => {
-        const attributeValue = getFullAttributeValue(skill.attribute);
+        const attributeValue = getFullAttributeValue(skill.attribute, characterAttributes);
         const attributeBonus = getAttributeBonus(attributeValue);
         const total = attributeBonus + skill.halfLevel + (skill.isTrained ? skill.trainedBonus : 0) + skill.others;
 
@@ -149,22 +108,13 @@ const Attributes = () => {
     } catch (err) {
       console.error('Erro ao atualizar atributo:', err);
       // Revert local state on error
-      if (characterAttributes) {
-        setAttributes([
-          { name: 'For', dbField: 'forca', value: characterAttributes.forca, modifier: 0 },
-          { name: 'Des', dbField: 'destreza', value: characterAttributes.destreza, modifier: 0 },
-          { name: 'Con', dbField: 'constituicao', value: characterAttributes.constituicao, modifier: 0 },
-          { name: 'Int', dbField: 'inteligencia', value: characterAttributes.inteligencia, modifier: 0 },
-          { name: 'Sab', dbField: 'sabedoria', value: characterAttributes.sabedoria, modifier: 0 },
-          { name: 'Car', dbField: 'carisma', value: characterAttributes.carisma, modifier: 0 }
-        ]);
-      }
+      setAttributes(createAttributeState(characterAttributes));
     }
   };
 
   const updateAttributeModifier = async (attrName: string, newModifier: number) => {
-    const attr = attributes.find(a => a.name === attrName);
-    if (!attr) return;
+    const attrDef = getAttributeByShortName(attrName);
+    if (!attrDef) return;
 
     // Update local state immediately for better UX
     const updatedAttributes = attributes.map(a => {
@@ -178,55 +128,20 @@ const Attributes = () => {
     });
     setAttributes(updatedAttributes);
 
-    // Map attribute name to temp mod field
-    const tempModFieldMap: { [key: string]: keyof CharacterAttributes } = {
-      'For': 'forcaTempMod',
-      'Des': 'destrezaTempMod',
-      'Con': 'constituicaoTempMod',
-      'Int': 'inteligenciaTempMod',
-      'Sab': 'sabedoriaTempMod',
-      'Car': 'carismaTempMod',
-    };
-
-    const tempModField = tempModFieldMap[attrName];
-    if (!tempModField) return;
-
     // Update database
     try {
       await updateAttributes({
-        [tempModField]: newModifier
+        [attrDef.tempModField]: newModifier
       } as any);
     } catch (err) {
       console.error('Erro ao atualizar modificador temporário:', err);
       // Revert local state on error
-      if (characterAttributes) {
-        setAttributes([
-          { name: 'For', dbField: 'forca', value: characterAttributes.forca, modifier: characterAttributes.forcaTempMod || 0 },
-          { name: 'Des', dbField: 'destreza', value: characterAttributes.destreza, modifier: characterAttributes.destrezaTempMod || 0 },
-          { name: 'Con', dbField: 'constituicao', value: characterAttributes.constituicao, modifier: characterAttributes.constituicaoTempMod || 0 },
-          { name: 'Int', dbField: 'inteligencia', value: characterAttributes.inteligencia, modifier: characterAttributes.inteligenciaTempMod || 0 },
-          { name: 'Sab', dbField: 'sabedoria', value: characterAttributes.sabedoria, modifier: characterAttributes.sabedoriaTempMod || 0 },
-          { name: 'Car', dbField: 'carisma', value: characterAttributes.carisma, modifier: characterAttributes.carismaTempMod || 0 }
-        ]);
-      }
+      setAttributes(createAttributeState(characterAttributes));
     }
   };
 
 
   const [skills, setSkills] = useState<Skill[]>([]);
-
-
-  const getAttributeColor = (name: string) => {
-    const colors: { [key: string]: string } = {
-      'For': '#e74c3c',
-      'Des': '#27ae60',
-      'Con': '#e67e22',
-      'Int': '#3498db',
-      'Sab': '#9b59b6',
-      'Car': '#e91e63'
-    };
-    return colors[name] || '#e94560';
-  };
 
   const rollSkill = (skill: Skill) => {
     const roll = Math.floor(Math.random() * 20) + 1;

@@ -1,12 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Navbar from '../../components/navbar/navbar';
 import GroupChest from '../../components/groupChest/groupChest';
 import GroupCurrency from '../../components/currency/GroupCurrency';
 import Modal from '../../components/modal/modal';
 import GroupForm from '../../components/modal/forms/GroupForm';
 import type { GroupFormData } from '../../components/modal/forms/GroupForm';
+import GroupMemberCard from '../../components/GroupMemberCard/GroupMemberCard';
 import { useCharacter } from '../../contexts/CharacterContext';
 import { supabase } from '../../config/supabase';
+import {
+  transformGroupItem,
+  GROUP_WITH_MEMBERS_QUERY,
+  GROUP_CONFIG,
+} from '../../utils/groupHelpers';
+import {
+  loadGroupStorageItems,
+} from '../../services/groupService';
+import { validateItemId } from '../../utils/errorHandler';
 import './group.css';
 
 
@@ -63,6 +73,13 @@ const Group = () => {
   const [joinMessage, setJoinMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
   const [groupChestItems, setGroupChestItems] = useState<any[]>([]);
   const [groupStorageId, setGroupStorageId] = useState<string | null>(null);
+
+  // Memoized average level calculation - Performance optimization
+  const averageLevel = useMemo(() => {
+    if (groupMembers.length === 0) return 0;
+    const totalLevel = groupMembers.reduce((acc, m) => acc + (m.character?.level || 0), 0);
+    return Math.round(totalLevel / groupMembers.length);
+  }, [groupMembers]);
 
   // Verificar se o personagem está em um grupo e carregar grupos disponíveis
   useEffect(() => {
@@ -130,13 +147,7 @@ const Group = () => {
           
           const { data: groupsData, error: groupsError } = await supabase
             .from('groups')
-            .select(`
-              *,
-              group_members (
-                id,
-                character_id
-              )
-            `);
+            .select(GROUP_WITH_MEMBERS_QUERY);
 
           if (groupsError) {
             throw groupsError;
@@ -145,7 +156,7 @@ const Group = () => {
           // Transformar dados dos grupos para o formato da interface
           const availableGroupsData: AvailableGroup[] = (groupsData || []).map(group => {
             const memberCount = group.group_members?.length || 0;
-            const maxMembers = 6; // Valor padrão, pode ser configurável no futuro
+            const maxMembers = GROUP_CONFIG.MAX_MEMBERS;
             
             return {
               id: group.id,
@@ -239,23 +250,7 @@ const Group = () => {
           if (itemsError) throw itemsError;
 
           // Transform the data to match our interface
-          const transformedItems = (itemsData || []).map((storageItem: any) => ({
-            id: storageItem.id,
-            name: storageItem.items.name,
-            description: storageItem.items.description || '',
-            quantity: storageItem.quantity,
-            slots: storageItem.items.slots_per_each,
-            price: storageItem.items.price,
-            category: storageItem.items.category,
-            attack_roll: storageItem.items.attack_roll,
-            damage: storageItem.items.damage,
-            crit: storageItem.items.crit,
-            range: storageItem.items.range,
-            damage_type: storageItem.items.damage_type,
-            armor_bonus: storageItem.items.armor_bonus,
-            armor_penalty: storageItem.items.armor_penalty,
-            effect: storageItem.items.effect,
-          }));
+          const transformedItems = (itemsData || []).map(transformGroupItem);
 
           setGroupChestItems(transformedItems);
         }
@@ -269,35 +264,6 @@ const Group = () => {
 
 
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'healthy':
-        return '#4ecca3';
-      case 'injured':
-        return '#f4a261';
-      case 'critical':
-        return '#e94560';
-      case 'unconscious':
-        return '#6c757d';
-      default:
-        return '#fff';
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'healthy':
-        return 'Saudável';
-      case 'injured':
-        return 'Ferido';
-      case 'critical':
-        return 'Crítico';
-      case 'unconscious':
-        return 'Inconsciente';
-      default:
-        return status;
-    }
-  };
 
 
 
@@ -346,50 +312,8 @@ const Group = () => {
 
       // Reload items
       const loadGroupStorage = async () => {
-        const { data: itemsData, error } = await supabase
-          .from('group_storage_items')
-          .select(`
-            id,
-            quantity,
-            items:item_id (
-              id,
-              name,
-              description,
-              price,
-              category,
-              slots_per_each,
-              attack_roll,
-              damage,
-              crit,
-              range,
-              damage_type,
-              armor_bonus,
-              armor_penalty,
-              effect
-            )
-          `)
-          .eq('storage_id', groupStorageId);
-
-        if (error) throw error;
-
-        const transformedItems = (itemsData || []).map((storageItem: any) => ({
-          id: storageItem.id,
-          name: storageItem.items.name,
-          description: storageItem.items.description || '',
-          quantity: storageItem.quantity,
-          slots: storageItem.items.slots_per_each,
-          price: storageItem.items.price,
-          category: storageItem.items.category,
-          attack_roll: storageItem.items.attack_roll,
-          damage: storageItem.items.damage,
-          crit: storageItem.items.crit,
-          range: storageItem.items.range,
-          damage_type: storageItem.items.damage_type,
-          armor_bonus: storageItem.items.armor_bonus,
-          armor_penalty: storageItem.items.armor_penalty,
-          effect: storageItem.items.effect,
-        }));
-
+        const itemsData = await loadGroupStorageItems(groupStorageId);
+        const transformedItems = itemsData.map(transformGroupItem);
         setGroupChestItems(transformedItems);
       };
 
@@ -400,13 +324,25 @@ const Group = () => {
   };
 
   const handleEditChestItem = (itemId: string) => {
+    /**
+     * FUTURE ENHANCEMENT: Group Chest Item Editing
+     *
+     * Allow group members to edit chest item properties (name, description, quantity).
+     * Implementation requires:
+     * - Create ChestItemEditModal component
+     * - Add permissions check (who can edit group items?)
+     * - Update group_storage_items table
+     * - Broadcast changes to all group members
+     *
+     * Complexity: Low | Priority: Medium
+     */
     console.log('Editar item do baú:', itemId);
-    // TODO: Implementar modal de edição de item
   };
 
   const handleDeleteChestItem = async (itemId: string) => {
+    validateItemId(itemId, 'handleDeleteChestItem');
     if (!confirm('Tem certeza que deseja deletar este item?')) return;
-    
+
     try {
       const { error } = await supabase
         .from('group_storage_items')
@@ -423,16 +359,42 @@ const Group = () => {
   };
 
   const handleMoveToInventory = (itemId: string) => {
+    /**
+     * FUTURE ENHANCEMENT: Transfer Items from Group Chest to Character Inventory
+     *
+     * Allow characters to take items from group storage to their personal inventory.
+     * Implementation requires:
+     * - Check character inventory capacity (max_inventory_slots)
+     * - Remove item from group_storage_items
+     * - Add item to character_items
+     * - Update current_load in characters table
+     * - Transaction log for audit trail
+     * - Permission check (can this character take items?)
+     *
+     * Complexity: High | Priority: Medium
+     */
     console.log('Mover item para o inventário:', itemId);
-    // TODO: Implementar lógica de movimentação de item
   };
 
   const handleSellChestItem = (itemId: string) => {
+    /**
+     * FUTURE ENHANCEMENT: Sell Group Chest Items
+     *
+     * Allow selling items from group chest and adding gold to group currency.
+     * Implementation requires:
+     * - Calculate sell price (item.value / 2 or custom pricing)
+     * - Remove item from group_storage_items
+     * - Add currency to group currency system
+     * - Create transaction record
+     * - Permission check (who can sell group items?)
+     *
+     * Complexity: Medium | Priority: Low
+     */
     console.log('Vender item do baú:', itemId);
-    // TODO: Implementar lógica de venda de item
   };
 
   const handleConsumeChestItem = async (itemId: string) => {
+    validateItemId(itemId, 'handleConsumeChestItem');
     try {
       const item = groupChestItems.find(i => i.id === itemId);
       if (!item) return;
@@ -462,6 +424,7 @@ const Group = () => {
   };
 
   const handleUpdateChestItemQuantity = async (itemId: string, newQuantity: number) => {
+    validateItemId(itemId, 'handleUpdateChestItemQuantity');
     try {
       const { error } = await supabase
         .from('group_storage_items')
@@ -480,13 +443,31 @@ const Group = () => {
   };
 
   const handleChestArrowsChange = (newValue: number) => {
+    /**
+     * FUTURE ENHANCEMENT: Group Ammunition Management
+     *
+     * Track arrows in group storage separate from character inventory.
+     * Implementation requires:
+     * - Add 'arrows' and 'bullets' fields to group_storage table
+     * - Update group storage record when ammunition changes
+     * - Allow transfer between group storage and character inventory
+     * - Consider ammunition consumption tracking
+     *
+     * Complexity: Low | Priority: Low
+     */
     console.log('Flechas do baú alteradas:', newValue);
-    // TODO: Implementar lógica de atualização de flechas do grupo
   };
 
   const handleChestBulletsChange = (newValue: number) => {
+    /**
+     * FUTURE ENHANCEMENT: Group Ammunition Management
+     *
+     * Track bullets in group storage separate from character inventory.
+     * See handleChestArrowsChange for implementation details.
+     *
+     * Complexity: Low | Priority: Low
+     */
     console.log('Balas do baú alteradas:', newValue);
-    // TODO: Implementar lógica de atualização de balas do grupo
   };
 
   // Função para atualizar as moedas do grupo
@@ -602,13 +583,7 @@ const Group = () => {
       // Verificar se o grupo ainda tem vagas
       const { data: groupData, error: groupError } = await supabase
         .from('groups')
-        .select(`
-          *,
-          group_members (
-            id,
-            character_id
-          )
-        `)
+        .select(GROUP_WITH_MEMBERS_QUERY)
         .eq('id', groupId)
         .single();
 
@@ -742,10 +717,7 @@ const Group = () => {
                   <div className="stat-item">
                     <span className="stat-label">Nível Médio:</span>
                     <span className="stat-value">
-                      {groupMembers.length > 0 
-                        ? Math.round(groupMembers.reduce((acc, m) => acc + (m.character?.level || 0), 0) / groupMembers.length)
-                        : 0
-                      }
+                      {averageLevel}
                     </span>
                   </div>
                 </div>
@@ -755,66 +727,9 @@ const Group = () => {
                 {groupMembers.map(member => {
                   const character = member.character;
                   if (!character) return null;
-                  
-                  const hpPercentage = character.max_health > 0 
-                    ? (character.current_health / character.max_health) * 100 
-                    : 0;
-                  
-                  const status = hpPercentage > 75 ? 'healthy' : 
-                                hpPercentage > 50 ? 'injured' : 
-                                hpPercentage > 25 ? 'critical' : 'unconscious';
-                  
+
                   return (
-                    <div key={member.id} className="member-card">
-                      <div className="member-header">
-                        <div className="member-avatar">
-                          {character.profile_img ? (
-                            <img src={character.profile_img} alt={character.name} />
-                          ) : (
-                            <div className="avatar-placeholder">
-                              {character.name.charAt(0)}
-                            </div>
-                          )}
-                        </div>
-                        <div className="member-info">
-                          <h3 className="member-name">{character.name}</h3>
-                          <p className="member-details">
-                            {character.race} {character.class} - Nível {character.level}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="member-hp-section">
-                        <div className="hp-header">
-                          <span className="hp-label">Pontos de Vida</span>
-                          <span className="hp-values">
-                            {character.current_health} / {character.max_health}
-                          </span>
-                        </div>
-                        <div className="hp-bar">
-                          <div 
-                            className="hp-fill"
-                            style={{
-                              width: `${hpPercentage}%`,
-                              backgroundColor: getStatusColor(status)
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="member-status">
-                        <span 
-                          className="status-badge"
-                          style={{
-                            backgroundColor: `${getStatusColor(status)}20`,
-                            color: getStatusColor(status),
-                            borderColor: getStatusColor(status)
-                          }}
-                        >
-                          {getStatusLabel(status)}
-                        </span>
-                      </div>
-                    </div>
+                    <GroupMemberCard key={member.id} character={character} />
                   );
                 })}
               </div>

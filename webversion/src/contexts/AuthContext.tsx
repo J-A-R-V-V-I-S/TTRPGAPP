@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { User, Session, AuthError } from '@supabase/supabase-js';
+import type { PostgrestError } from '@supabase/postgrest-js';
 import { supabase } from '../config/supabase';
 
 interface AuthContextType {
@@ -8,7 +9,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
-  signUp: (email: string, password: string, username: string, isGameMaster?: boolean) => Promise<{ error: AuthError | null }>;
+  signUp: (email: string, password: string, username: string, isGameMaster?: boolean) => Promise<{ error: AuthError | PostgrestError | null }>;
   signOut: () => Promise<void>;
 }
 
